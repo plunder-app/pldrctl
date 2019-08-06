@@ -24,51 +24,20 @@ var PlunderServer struct {
 var logLevel int
 var urlString, username, password string
 
+// TODO - thebsdbox(enable username/pass)
+var disableauth bool
+
 func init() {
 	GetPlunderCmd.PersistentFlags().StringVar(&urlString, "url", os.Getenv("pURL"), "The Url of a plunder server")
 	GetPlunderCmd.PersistentFlags().StringVar(&username, "user", os.Getenv("pUser"), "The Username for a plunder server")
 	GetPlunderCmd.PersistentFlags().StringVar(&password, "pass", os.Getenv("pPass"), "The Password password a plunder server")
 
-	pldrcltCmd.PersistentFlags().IntVar(&logLevel, "logLevel", 5, "Set the logging level [0=panic, 3=warning, 5=debug]")
+	pldrcltCmd.PersistentFlags().IntVar(&logLevel, "logLevel", int(log.InfoLevel), "Set the logging level [0=panic, 3=warning, 5=debug]")
 
 	pldrcltCmd.AddCommand(GetPlunderCmd)
 	pldrcltCmd.AddCommand(pldrcltVersion)
-	log.SetLevel(log.Level(logLevel))
 }
 
-func processURL(urlString, username, password string) (*url.URL, error) {
-	// Check that an address was actually entered
-	if urlString == "" {
-		return nil, fmt.Errorf("No Plunder server Address has been submitted")
-	}
-
-	// Check that the URL can be parsed
-	u, err := url.Parse(urlString)
-	if err != nil {
-		return nil, fmt.Errorf("URL can't be parsed [%s]", err.Error())
-	}
-
-	// Check if a username was entered
-	if username == "" {
-		// if no username does one exist as part of the url
-		if u.User.Username() == "" {
-			return nil, fmt.Errorf("No Username has been submitted")
-		}
-	} else {
-		// A username was submitted update the url
-		u.User = url.User(username)
-	}
-
-	if password == "" {
-		_, set := u.User.Password()
-		if set == false {
-			return nil, fmt.Errorf("No Password has been submitted")
-		}
-	} else {
-		u.User = url.UserPassword(u.User.Username(), password)
-	}
-	return u, nil
-}
 
 // Execute - starts the command parsing process
 func Execute() {
@@ -79,9 +48,6 @@ func Execute() {
 		}
 		// We've only parsed to an 8bit integer, however i is still a int64 so needs casting
 		logLevel = int(i)
-	} else {
-		// Default to logging anything Info and below
-		logLevel = int(log.InfoLevel)
 	}
 
 	if err := pldrcltCmd.Execute(); err != nil {
