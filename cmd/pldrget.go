@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/plunder-app/plunder/pkg/server"
+	"github.com/plunder-app/plunder/pkg/apiserver"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -20,7 +20,7 @@ var getAll = &cobra.Command{
 		log.SetLevel(log.Level(logLevel))
 
 		var err error
-		PlunderServer.URL, err = processURL(urlString, username, password, server.DeploymentAPIPath())
+		PlunderServer.URL, err = processURL(urlString, apiserver.DeploymentsAPIPath())
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
@@ -39,7 +39,7 @@ var getGlobal = &cobra.Command{
 		log.SetLevel(log.Level(logLevel))
 
 		var err error
-		PlunderServer.URL, err = processURL(urlString, username, password, server.ConfigAPIPath())
+		PlunderServer.URL, err = processURL(urlString, apiserver.ConfigAPIPath())
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
@@ -58,7 +58,7 @@ var getConfig = &cobra.Command{
 		log.SetLevel(log.Level(logLevel))
 
 		var err error
-		PlunderServer.URL, err = processURL(urlString, username, password, server.ConfigAPIPath())
+		PlunderServer.URL, err = processURL(urlString, apiserver.ConfigAPIPath())
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}

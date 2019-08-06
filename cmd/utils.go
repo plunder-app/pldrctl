@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -10,11 +12,12 @@ import (
 	"path"
 	"text/tabwriter"
 
-	"github.com/plunder-app/plunder/pkg/server"
+	"github.com/plunder-app/plunder/pkg/apiserver"
+	"github.com/plunder-app/plunder/pkg/services"
 	log "github.com/sirupsen/logrus"
 )
 
-func processURL(urlString, username, password, endpoint string) (*url.URL, error) {
+func processURL(urlString, endpoint string) (*url.URL, error) {
 	// Check that an address was actually entered
 	if urlString == "" {
 		return nil, fmt.Errorf("No Plunder server Address has been submitted")
@@ -26,41 +29,36 @@ func processURL(urlString, username, password, endpoint string) (*url.URL, error
 		return nil, fmt.Errorf("URL can't be parsed [%s]", err.Error())
 	}
 
-	//TODO - thebsdbox this will need removing
-
-	if disableauth {
-		// Check if a username was entered
-		if username == "" {
-			// if no username does one exist as part of the url
-			if u.User.Username() == "" {
-				return nil, fmt.Errorf("No Username has been submitted")
-			}
-		} else {
-			// A username was submitted update the url
-			u.User = url.User(username)
-		}
-
-		if password == "" {
-			_, set := u.User.Password()
-			if set == false {
-				return nil, fmt.Errorf("No Password has been submitted")
-			}
-		} else {
-			u.User = url.UserPassword(u.User.Username(), password)
-		}
-	}
 	u.Path = path.Join(u.Path, endpoint)
 
 	return u, nil
 }
 
 func parseDeployments(u *url.URL) error {
-	log.Infof("Querying the Deployment Server [%s]", u.String())
+	log.Debugf("Querying the Deployment Server [%s]", u.String())
 
-	resp, err := http.Get(u.String())
+	// Create a CA certificate pool and add cert.pem to it
+	caCert, err := ioutil.ReadFile("plunder.pem")
+	if err != nil {
+		log.Fatal(err)
+	}
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+
+	// Create a HTTPS client and supply the created CA pool
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				RootCAs: caCertPool,
+			},
+		},
+	}
+
+	resp, err := client.Get(u.String())
 	if err != nil {
 		return err
 	}
+
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 
@@ -68,25 +66,44 @@ func parseDeployments(u *url.URL) error {
 		return fmt.Errorf(resp.Status)
 	}
 
-	var cfg server.DeploymentConfigurationFile
-	err = json.Unmarshal(body, &cfg)
+	var response apiserver.Response
+	err = json.Unmarshal(body, &response)
 	if err != nil {
 		return err
 	}
-	if len(cfg.Deployments) == 0 {
-		log.Warnln("No deployment configurations found")
+
+	if response.Error != "" {
+		return fmt.Errorf("%s", response.Error)
 	}
-	formatOutput(cfg)
+
+	var deployments services.DeploymentConfigurationFile
+
+	err = json.Unmarshal(response.Payload, &deployments)
+	if err != nil {
+		return err
+	}
+
+	//test := response.Payload.()
+	// if len(cfg.FriendlyError) == 0 {
+	// 	log.Warnln("No deployment configurations found")
+	// }
+
+	// a, err := json.MarshalIndent(response.Payload, "", "\t")
+	// if err != nil {
+	// 	return err
+	// }
+	//fmt.Printf("%s\n%s\n", a, test)
+	formatOutput(deployments)
 	return nil
 }
 
-func formatOutput(plunderConfig server.DeploymentConfigurationFile) {
+func formatOutput(plunderConfig services.DeploymentConfigurationFile) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(w, "Mac Address\tDeploymemt\tAllocated IP")
-	for i := range plunderConfig.Deployments {
-		d := plunderConfig.Deployments[i]
+	for i := range plunderConfig.Configs {
+		d := plunderConfig.Configs[i]
 
-		fmt.Fprintf(w, "%s\t%s\t%s\n", d.MAC, d.Deployment, d.Config.IPAddress)
+		fmt.Fprintf(w, "%s\t%s\t%s\n", d.MAC, d.ConfigName, d.ConfigHost.IPAddress)
 	}
 	w.Flush()
 
