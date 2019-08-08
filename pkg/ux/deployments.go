@@ -8,8 +8,8 @@ import (
 	"github.com/plunder-app/plunder/pkg/services"
 )
 
-// DeploymentFormat -
-func DeploymentFormat(plunderConfig services.DeploymentConfigurationFile) {
+// DeploymentsGetFormat -
+func DeploymentsGetFormat(plunderConfig services.DeploymentConfigurationFile) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(w, "Mac Address\tDeploymemt\tHostname\tIP Address")
 	for i := range plunderConfig.Configs {
@@ -18,7 +18,21 @@ func DeploymentFormat(plunderConfig services.DeploymentConfigurationFile) {
 		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", d.MAC, d.ConfigName, d.ConfigHost.ServerName, d.ConfigHost.IPAddress)
 	}
 	w.Flush()
+}
 
+// DeploymentDescribeBootFormat -
+func DeploymentDescribeBootFormat(h services.DeploymentConfig, plunderURL string) {
+	fmt.Printf("Boot description for deployment [%s]\n", h.ConfigHost.ServerName)
+	fmt.Printf("-----------------------------------------------------------\n\n")
+	fmt.Printf("Phase one\n------------------\n")
+	fmt.Printf("DHCP Request -> TFTP Boot -> iPXE boot with config file -> http://%s/%s.ipxe\n", plunderURL, h.ConfigName)
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	fmt.Fprintf(w, "%s:\t%s\n", "Deployment", h.ConfigName)
+	fmt.Fprintf(w, "%s:\t%s\n", "Kernel", h.ConfigBoot.Kernel)
+	fmt.Fprintf(w, "%s:\t%s\n", "Initrd", h.ConfigBoot.Initrd)
+	fmt.Fprintf(w, "%s:\t%s\n", "cmdline", h.ConfigBoot.Cmdline)
+
+	w.Flush()
 }
 
 //GlobalFormat will display the global deployment configuration for a Plunder Server
