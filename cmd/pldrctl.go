@@ -22,12 +22,14 @@ var urlFlag, pathFlag string
 var disableauth bool
 
 func init() {
-	GetPlunderCmd.PersistentFlags().StringVar(&urlFlag, "url", os.Getenv("pURL"), "The Url of a plunder server")
 	pldrcltCmd.PersistentFlags().IntVar(&logLevel, "logLevel", int(log.InfoLevel), "Set the logging level [0=panic, 3=warning, 5=debug]")
 	pldrcltCmd.PersistentFlags().StringVarP(&pathFlag, "path", "p", "plunderclient.yaml", "Path to a custom Plunder Server configuation")
 
-	pldrcltCmd.AddCommand(GetPlunderCmd)
-	pldrcltCmd.AddCommand(pldrcltVersion)
+	pldrcltlGet.PersistentFlags().StringVar(&urlFlag, "url", os.Getenv("pURL"), "The Url of a plunder server")
+
+	pldrcltCmd.AddCommand(pldrcltlDescribe)
+	pldrcltCmd.AddCommand(pldrcltlGet)
+	pldrcltCmd.AddCommand(pldrcltlVersion)
 }
 
 // Execute - starts the command parsing process
@@ -57,16 +59,7 @@ var pldrcltCmd = &cobra.Command{
 	},
 }
 
-//GetPlunderCmd - is used for it's subcommands for pulling data from a plunder server
-var GetPlunderCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Retrieve data from a Plunder server",
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
-	},
-}
-
-var pldrcltVersion = &cobra.Command{
+var pldrcltlVersion = &cobra.Command{
 	Use:   "version",
 	Short: "Version and Release information about the plunder tool",
 	Run: func(cmd *cobra.Command, args []string) {

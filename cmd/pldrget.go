@@ -15,10 +15,19 @@ import (
 
 func init() {
 
-	GetPlunderCmd.AddCommand(getDeployments)
-	GetPlunderCmd.AddCommand(getGlobal)
-	GetPlunderCmd.AddCommand(getConfig)
+	pldrcltlGet.AddCommand(getDeployments)
+	pldrcltlGet.AddCommand(getGlobal)
+	pldrcltlGet.AddCommand(getConfig)
 
+}
+
+//GetPlunderCmd - is used for it's subcommands for pulling data from a plunder server
+var pldrcltlGet = &cobra.Command{
+	Use:   "get",
+	Short: "Retrieve data from a Plunder server",
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
 }
 
 var getDeployments = &cobra.Command{
@@ -36,7 +45,9 @@ var getDeployments = &cobra.Command{
 		u.Path = path.Join(u.Path, apiserver.DeploymentsAPIPath())
 
 		response, err := plunderapi.ParsePlunderGet(u, c)
-
+		if err != nil {
+			log.Fatalf("%s", err.Error())
+		}
 		// If an error has been returned then handle the error gracefully and terminate
 		if response.FriendlyError != "" || response.Error != "" {
 
@@ -49,7 +60,7 @@ var getDeployments = &cobra.Command{
 			log.Fatalf("%s", err.Error())
 		}
 
-		ux.DeploymentFormat(deployments)
+		ux.DeploymentsGetFormat(deployments)
 	},
 }
 
@@ -118,7 +129,5 @@ var getConfig = &cobra.Command{
 		}
 
 		ux.ServerFormat(serverConfig)
-		//ux.GlobalFormat(deployments.GlobalServerConfig)
-
 	},
 }
