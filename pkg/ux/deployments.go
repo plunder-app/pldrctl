@@ -21,18 +21,38 @@ func DeploymentsGetFormat(plunderConfig services.DeploymentConfigurationFile) {
 }
 
 // DeploymentDescribeBootFormat -
-func DeploymentDescribeBootFormat(h services.DeploymentConfig, plunderURL string) {
-	fmt.Printf("Boot description for deployment [%s]\n", h.ConfigHost.ServerName)
-	fmt.Printf("-----------------------------------------------------------\n\n")
-	fmt.Printf("Phase one\n------------------\n")
-	fmt.Printf("DHCP Request -> TFTP Boot -> iPXE boot with config file -> http://%s/%s.ipxe\n", plunderURL, h.ConfigName)
+func DeploymentDescribeBootFormat(h services.DeploymentConfig, plunderURL, dashmac string) {
+	// Boot Configuration
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintf(w, "%s:\t%s\n", "Deployment", h.ConfigName)
-	fmt.Fprintf(w, "%s:\t%s\n", "Kernel", h.ConfigBoot.Kernel)
-	fmt.Fprintf(w, "%s:\t%s\n", "Initrd", h.ConfigBoot.Initrd)
-	fmt.Fprintf(w, "%s:\t%s\n", "cmdline", h.ConfigBoot.Cmdline)
+	// Config overview
+	fmt.Fprintf(w, "%s:\t\n", "Config")
+	fmt.Fprintf(w, "\t%s:\t%s\n", "Deployment Type", h.ConfigName)
+	fmt.Fprintf(w, "\t%s:\t%s\n", "Kernel", h.ConfigBoot.Kernel)
+	fmt.Fprintf(w, "\t%s:\t%s\n", "Initrd", h.ConfigBoot.Initrd)
+	fmt.Fprintf(w, "\t%s:\t%s\n", "cmdline", h.ConfigBoot.Cmdline)
+	fmt.Fprintf(w, "\t%s:\t%s\n", "Adapter", h.ConfigHost.Adapter)
+	fmt.Fprintf(w, "\t%s:\t%s\n", "Server Name", h.ConfigHost.ServerName)
+	fmt.Fprintf(w, "\t%s:\t%s\n", "IP Address", h.ConfigHost.IPAddress)
+
+	// Boot Phases
+	fmt.Fprintf(w, "%s:\t\n", "Phase One")
+	fmt.Fprintf(w, "\t%s:\t%s\n", "Action", "DHCP Request -> TFTP Boot -> iPXE boot with config file")
+	fmt.Fprintf(w, "\t%s:\thttp://%s/%s.ipxe\n", "Config", plunderURL, dashmac)
+	// Further Boot Phases
+	if h.ConfigName == "preseed" || h.ConfigName == "vsphere" {
+		// Phase two boot
+		fmt.Fprintf(w, "%s:\t\n", "Phase Two")
+		fmt.Fprintf(w, "\t%s:\t%s\n", "Action", "OS Bootstraps with config")
+		fmt.Fprintf(w, "\t%s:\thttp://%s/%s.cfg\n", "Config", plunderURL, dashmac)
+		if h.ConfigName == "vsphere" {
+			fmt.Fprintf(w, "%s:\t\n", "Phase Three")
+			fmt.Fprintf(w, "\t%s:\t%s\n", "Action", "vSphere installer with config")
+			fmt.Fprintf(w, "\t%s:\thttp://%s/%s.ks\n", "Config", plunderURL, dashmac)
+		}
+	}
 
 	w.Flush()
+
 }
 
 //GlobalFormat will display the global deployment configuration for a Plunder Server
