@@ -62,8 +62,6 @@ var describeDeploymentBootProcess = &cobra.Command{
 			log.Fatalf("%s", err.Error())
 		}
 
-		ux.DeploymentDescribeBootFormat(deployment, u.Hostname())
-		//ux.GlobalFormat(deployments.GlobalServerConfig)
-
+		ux.DeploymentDescribeBootFormat(deployment, u.Hostname(), dashMac)
 	},
 }
