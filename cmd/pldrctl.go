@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"strconv"
 
@@ -15,20 +16,28 @@ var Release struct {
 	Build   string
 }
 
+// PlunderServer - Contains all the details needed to interact with a server instance
+var PlunderServer struct {
+	URL *url.URL
+}
+
 var logLevel int
-var urlFlag, pathFlag string
+var urlString, username, password string
 
 // TODO - thebsdbox(enable username/pass)
 var disableauth bool
 
 func init() {
-	GetPlunderCmd.PersistentFlags().StringVar(&urlFlag, "url", os.Getenv("pURL"), "The Url of a plunder server")
+	GetPlunderCmd.PersistentFlags().StringVar(&urlString, "url", os.Getenv("pURL"), "The Url of a plunder server")
+	GetPlunderCmd.PersistentFlags().StringVar(&username, "user", os.Getenv("pUser"), "The Username for a plunder server")
+	GetPlunderCmd.PersistentFlags().StringVar(&password, "pass", os.Getenv("pPass"), "The Password password a plunder server")
+
 	pldrcltCmd.PersistentFlags().IntVar(&logLevel, "logLevel", int(log.InfoLevel), "Set the logging level [0=panic, 3=warning, 5=debug]")
-	pldrcltCmd.PersistentFlags().StringVarP(&pathFlag, "path", "p", "plunderclient.yaml", "Path to a custom Plunder Server configuation")
 
 	pldrcltCmd.AddCommand(GetPlunderCmd)
 	pldrcltCmd.AddCommand(pldrcltVersion)
 }
+
 
 // Execute - starts the command parsing process
 func Execute() {
@@ -49,7 +58,7 @@ func Execute() {
 
 var pldrcltCmd = &cobra.Command{
 	Use:   "pldrctl",
-	Short: "Plunder CLI (command line interface)",
+	Short: "VMware vCenter Text User Interface",
 	Run: func(cmd *cobra.Command, args []string) {
 		log.SetLevel(log.Level(logLevel))
 		cmd.Help()
