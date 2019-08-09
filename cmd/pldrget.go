@@ -18,6 +18,7 @@ func init() {
 	pldrcltlGet.AddCommand(getDeployments)
 	pldrcltlGet.AddCommand(getGlobal)
 	pldrcltlGet.AddCommand(getConfig)
+	pldrcltlGet.AddCommand(getUnLeased)
 
 }
 
@@ -129,5 +130,39 @@ var getConfig = &cobra.Command{
 		}
 
 		ux.ServerFormat(serverConfig)
+	},
+}
+
+var getUnLeased = &cobra.Command{
+	Use:   "unleased",
+	Short: "Retrieve the addresses that Plunder hasn't allocated",
+	Run: func(cmd *cobra.Command, args []string) {
+		// Parse through the flags and attempt to build a correct URL
+		log.SetLevel(log.Level(logLevel))
+
+		u, c, err := plunderapi.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+		if err != nil {
+			log.Fatalf("%s", err.Error())
+		}
+
+		u.Path = path.Join(u.Path, apiserver.DHCPAPIPath()+"/unleased")
+
+		response, err := plunderapi.ParsePlunderGet(u, c)
+		if err != nil {
+			log.Fatalf("%s", err.Error())
+		}
+		// If an error has been returned then handle the error gracefully and terminate
+		if response.FriendlyError != "" || response.Error != "" {
+			log.Fatalf("%s", err.Error())
+
+		}
+		var unleased []services.Lease
+
+		err = json.Unmarshal(response.Payload, &unleased)
+		if err != nil {
+			log.Fatalf("%s", err.Error())
+		}
+
+		ux.LeasesGetFormat(unleased)
 	},
 }
