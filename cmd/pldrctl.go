@@ -18,18 +18,19 @@ var Release struct {
 var logLevel int
 var urlFlag, pathFlag string
 
-// TODO - thebsdbox(enable username/pass)
-var disableauth bool
+// Used to determine JSON/YAML output
+var outputFlag string
 
 func init() {
-	pldrcltCmd.PersistentFlags().IntVar(&logLevel, "logLevel", int(log.InfoLevel), "Set the logging level [0=panic, 3=warning, 5=debug]")
-	pldrcltCmd.PersistentFlags().StringVarP(&pathFlag, "path", "p", "plunderclient.yaml", "Path to a custom Plunder Server configuation")
+	pldrctlCmd.PersistentFlags().StringVarP(&outputFlag, "output", "o", "", "The Url of a plunder server")
 
-	pldrcltlGet.PersistentFlags().StringVar(&urlFlag, "url", os.Getenv("pURL"), "The Url of a plunder server")
+	pldrctlCmd.PersistentFlags().IntVar(&logLevel, "logLevel", int(log.InfoLevel), "Set the logging level [0=panic, 3=warning, 5=debug]")
+	pldrctlCmd.PersistentFlags().StringVarP(&pathFlag, "path", "p", "plunderclient.yaml", "Path to a custom Plunder Server configuation")
 
-	pldrcltCmd.AddCommand(pldrcltlDescribe)
-	pldrcltCmd.AddCommand(pldrcltlGet)
-	pldrcltCmd.AddCommand(pldrcltlVersion)
+	pldrctlCmd.AddCommand(pldrctlApply)
+	pldrctlCmd.AddCommand(pldrctlDescribe)
+	pldrctlCmd.AddCommand(pldrctlGet)
+	pldrctlCmd.AddCommand(pldrctlVersion)
 }
 
 // Execute - starts the command parsing process
@@ -43,13 +44,13 @@ func Execute() {
 		logLevel = int(i)
 	}
 
-	if err := pldrcltCmd.Execute(); err != nil {
+	if err := pldrctlCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 }
 
-var pldrcltCmd = &cobra.Command{
+var pldrctlCmd = &cobra.Command{
 	Use:   "pldrctl",
 	Short: "Plunder CLI (command line interface)",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -59,7 +60,7 @@ var pldrcltCmd = &cobra.Command{
 	},
 }
 
-var pldrcltlVersion = &cobra.Command{
+var pldrctlVersion = &cobra.Command{
 	Use:   "version",
 	Short: "Version and Release information about the plunder tool",
 	Run: func(cmd *cobra.Command, args []string) {

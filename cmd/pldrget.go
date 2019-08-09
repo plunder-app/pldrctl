@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"os"
 	"path"
 
 	"github.com/plunder-app/pldrctl/pkg/plunderapi"
@@ -14,16 +15,14 @@ import (
 )
 
 func init() {
+	pldrctlGet.PersistentFlags().StringVar(&urlFlag, "url", os.Getenv("pURL"), "The Url of a plunder server")
 
-	pldrcltlGet.AddCommand(getDeployments)
-	pldrcltlGet.AddCommand(getGlobal)
-	pldrcltlGet.AddCommand(getConfig)
-	pldrcltlGet.AddCommand(getUnLeased)
+	pldrctlGet.AddCommand(getDeployments)
+	pldrctlGet.AddCommand(getGlobal)
+	pldrctlGet.AddCommand(getConfig)
+	pldrctlGet.AddCommand(getUnLeased)
 
-}
-
-//GetPlunderCmd - is used for it's subcommands for pulling data from a plunder server
-var pldrcltlGet = &cobra.Command{
+var pldrctlGet = &cobra.Command{
 	Use:   "get",
 	Short: "Retrieve data from a Plunder server",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -51,7 +50,8 @@ var getDeployments = &cobra.Command{
 		}
 		// If an error has been returned then handle the error gracefully and terminate
 		if response.FriendlyError != "" || response.Error != "" {
-
+			log.Debugln(response.Error)
+			log.Fatalln(response.FriendlyError)
 		}
 
 		var deployments services.DeploymentConfigurationFile
@@ -61,7 +61,11 @@ var getDeployments = &cobra.Command{
 			log.Fatalf("%s", err.Error())
 		}
 
-		ux.DeploymentsGetFormat(deployments)
+		if outputFlag != "" {
+			err = ux.CheckOutFlag(outputFlag, NewResourceContainer("deployments", response.Payload))
+		} else {
+			ux.DeploymentsGetFormat(deployments)
+		}
 	},
 }
 
@@ -85,8 +89,8 @@ var getGlobal = &cobra.Command{
 		}
 		// If an error has been returned then handle the error gracefully and terminate
 		if response.FriendlyError != "" || response.Error != "" {
-			log.Fatalf("%s", err.Error())
-
+			log.Debugln(response.Error)
+			log.Fatalln(response.FriendlyError)
 		}
 		var deployments services.DeploymentConfigurationFile
 
@@ -95,7 +99,13 @@ var getGlobal = &cobra.Command{
 			log.Fatalf("%s", err.Error())
 		}
 
-		ux.GlobalFormat(deployments.GlobalServerConfig)
+		globalConfigJSON, _ := json.Marshal(deployments.GlobalServerConfig)
+
+		if outputFlag != "" {
+			err = ux.CheckOutFlag(outputFlag, NewResourceContainer("globalConfig", globalConfigJSON))
+		} else {
+			ux.GlobalFormat(deployments.GlobalServerConfig)
+		}
 	},
 }
 
@@ -119,8 +129,8 @@ var getConfig = &cobra.Command{
 		}
 		// If an error has been returned then handle the error gracefully and terminate
 		if response.FriendlyError != "" || response.Error != "" {
-			log.Fatalf("%s", err.Error())
-
+			log.Debugln(response.Error)
+			log.Fatalln(response.FriendlyError)
 		}
 		var serverConfig services.BootController
 
@@ -128,8 +138,11 @@ var getConfig = &cobra.Command{
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
-
-		ux.ServerFormat(serverConfig)
+		if outputFlag != "" {
+			err = ux.CheckOutFlag(outputFlag, NewResourceContainer("serverConfig", response.Payload))
+		} else {
+			ux.ServerFormat(serverConfig)
+		}
 	},
 }
 

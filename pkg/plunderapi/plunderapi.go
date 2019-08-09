@@ -1,6 +1,7 @@
 package plunderapi
 
 import (
+	"bytes"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
@@ -62,6 +63,33 @@ func ParsePlunderGet(u *url.URL, c *http.Client) (*apiserver.Response, error) {
 	log.Debugf("Querying the Plunder Server [%s]", u.String())
 
 	resp, err := c.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if resp.StatusCode > 200 {
+		return nil, fmt.Errorf(resp.Status)
+	}
+
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return &response, nil
+
+}
+
+//ParsePlunderPost will attempt to retrieve data from the plunder API server
+func ParsePlunderPost(u *url.URL, c *http.Client, data []byte) (*apiserver.Response, error) {
+	var response apiserver.Response
+
+	log.Debugf("Posting [%d] bytes to the Plunder Server [%s]", len(data), u.String())
+
+	resp, err := c.Post(u.String(), "application/json", bytes.NewBuffer(data))
 	if err != nil {
 		return nil, err
 	}
