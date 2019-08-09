@@ -30,6 +30,7 @@ func init() {
 	// Add all of the subcommands to the pldrctl UX
 	pldrctlCmd.AddCommand(pldrctlApply)
 	pldrctlCmd.AddCommand(pldrctlCreate)
+	pldrctlCmd.AddCommand(pldrctlDelete)
 	pldrctlCmd.AddCommand(pldrctlDescribe)
 	pldrctlCmd.AddCommand(pldrctlGet)
 	pldrctlCmd.AddCommand(pldrctlVersion)
