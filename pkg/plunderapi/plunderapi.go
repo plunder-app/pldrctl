@@ -109,3 +109,36 @@ func ParsePlunderPost(u *url.URL, c *http.Client, data []byte) (*apiserver.Respo
 	return &response, nil
 
 }
+
+//ParsePlunderDelete will attempt to retrieve data from the plunder API server
+func ParsePlunderDelete(u *url.URL, c *http.Client) (*apiserver.Response, error) {
+	var response apiserver.Response
+
+	log.Debugf("Requesting DELETE method to [%s]", u.String())
+
+	// Create request
+	req, err := http.NewRequest("DELETE", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := c.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if resp.StatusCode > 200 {
+		return nil, fmt.Errorf(resp.Status)
+	}
+
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return &response, nil
+
+}
