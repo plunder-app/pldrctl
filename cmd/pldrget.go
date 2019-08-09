@@ -21,6 +21,7 @@ func init() {
 	pldrctlGet.AddCommand(getGlobal)
 	pldrctlGet.AddCommand(getConfig)
 	pldrctlGet.AddCommand(getUnLeased)
+}
 
 var pldrctlGet = &cobra.Command{
 	Use:   "get",
