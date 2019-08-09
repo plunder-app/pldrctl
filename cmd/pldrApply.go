@@ -48,9 +48,13 @@ var pldrctlApply = &cobra.Command{
 			if _, err := os.Stat(applyPathFlag); !os.IsNotExist(err) {
 				output, err = ioutil.ReadFile(applyPathFlag)
 				if err != nil {
+					cmd.Help()
+
 					log.Fatalf("%v", err)
 				}
 			} else {
+				cmd.Help()
+
 				log.Fatalf("Unable to open [%s]", applyPathFlag)
 			}
 		}
@@ -59,10 +63,16 @@ var pldrctlApply = &cobra.Command{
 		}
 		resource, rawJSON, err := UnPackResourceContainer(output)
 		if err != nil {
+			cmd.Help()
 			log.Fatalln(err)
 		}
 
-		parseApply(resource, rawJSON)
+		err = parseApply(resource, rawJSON)
+		if err != nil {
+			cmd.Help()
+
+			log.Fatalf("%v", err)
+		}
 	},
 }
 
@@ -101,6 +111,7 @@ func parseApply(resourceDefinition string, resource json.RawMessage) error {
 			log.Debugln(response.Error)
 			log.Fatalln(response.FriendlyError)
 		}
+
 	case "deployments":
 	case "globalConfig":
 	default:

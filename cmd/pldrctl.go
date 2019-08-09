@@ -27,7 +27,9 @@ func init() {
 	pldrctlCmd.PersistentFlags().IntVar(&logLevel, "logLevel", int(log.InfoLevel), "Set the logging level [0=panic, 3=warning, 5=debug]")
 	pldrctlCmd.PersistentFlags().StringVarP(&pathFlag, "path", "p", "plunderclient.yaml", "Path to a custom Plunder Server configuation")
 
+	// Add all of the subcommands to the pldrctl UX
 	pldrctlCmd.AddCommand(pldrctlApply)
+	pldrctlCmd.AddCommand(pldrctlCreate)
 	pldrctlCmd.AddCommand(pldrctlDescribe)
 	pldrctlCmd.AddCommand(pldrctlGet)
 	pldrctlCmd.AddCommand(pldrctlVersion)
