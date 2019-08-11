@@ -8,6 +8,21 @@ import (
 	"github.com/plunder-app/plunder/pkg/services"
 )
 
+//BootFormat will display the global deployment configuration for a Plunder Server
+func BootFormat(bootConfigs []services.BootConfig) {
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(w, "Config Name\tKernel Path\tInitrd Path\tCommand Line")
+	for i := range bootConfigs {
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
+			bootConfigs[i].ConfigName,
+			bootConfigs[i].Kernel,
+			bootConfigs[i].Initrd,
+			bootConfigs[i].Cmdline)
+	}
+	w.Flush()
+
+}
+
 //ServerFormat will display the global deployment configuration for a Plunder Server
 func ServerFormat(b services.BootController) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)

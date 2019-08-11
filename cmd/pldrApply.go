@@ -19,7 +19,7 @@ import (
 var applyPathFlag string
 
 func init() {
-	pldrctlApply.Flags().StringVarP(&applyPathFlag, "file", "f", "", "Address of Gateway to use, if blank will default to [addressDHCP]")
+	pldrctlApply.Flags().StringVarP(&applyPathFlag, "file", "f", "", "Path of a Plunder configuration to be applied to a server")
 }
 
 //pldrctlApply - is used for it's subcommands for pulling data from a plunder server
@@ -84,12 +84,12 @@ func parseApply(resourceDefinition string, resource json.RawMessage) error {
 	//dashMac := strings.Replace(args[0], ":", "-", -1)
 
 	switch strings.ToLower(resourceDefinition) {
+	case "boot":
 	case "config":
 	case "deployment":
-		// Set the url
+
 		u.Path = path.Join(u.Path, apiserver.DeploymentAPIPath())
 
-		// Apply the POST
 		response, err := plunderapi.ParsePlunderPost(u, c, resource)
 		if err != nil {
 			log.Fatalf("%s", err.Error())

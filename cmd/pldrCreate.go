@@ -37,9 +37,10 @@ var pldrctlCreate = &cobra.Command{
 		}
 
 		switch strings.ToLower(createTypeFlag) {
+		case "boot":
 		case "config":
 		case "deployment":
-
+			// Call external function (TODO)
 			u.Path = path.Join(u.Path, apiserver.DeploymentAPIPath())
 			b, err := json.Marshal(deployment)
 			if err != nil {
@@ -58,6 +59,7 @@ var pldrctlCreate = &cobra.Command{
 		case "deployments":
 		case "globalConfig":
 		default:
+			cmd.Help()
 			log.Fatalf("Unknown resource Definition [%s]", createTypeFlag)
 
 		}

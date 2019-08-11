@@ -17,6 +17,7 @@ import (
 func init() {
 	pldrctlGet.PersistentFlags().StringVar(&urlFlag, "url", os.Getenv("pURL"), "The Url of a plunder server")
 
+	pldrctlGet.AddCommand(getBoot)
 	pldrctlGet.AddCommand(getDeployments)
 	pldrctlGet.AddCommand(getGlobal)
 	pldrctlGet.AddCommand(getConfig)
@@ -28,6 +29,80 @@ var pldrctlGet = &cobra.Command{
 	Short: "Retrieve data from a Plunder server",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
+	},
+}
+
+var getBoot = &cobra.Command{
+	Use:   "boot",
+	Short: "Retrieve the Plunder server boot configuration from a Plunder instance",
+	Run: func(cmd *cobra.Command, args []string) {
+		// Parse through the flags and attempt to build a correct URL
+		log.SetLevel(log.Level(logLevel))
+
+		u, c, err := plunderapi.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+		if err != nil {
+			log.Fatalf("%s", err.Error())
+		}
+
+		u.Path = path.Join(u.Path, apiserver.ConfigAPIPath())
+
+		response, err := plunderapi.ParsePlunderGet(u, c)
+		if err != nil {
+			log.Fatalf("%s", err.Error())
+		}
+		// If an error has been returned then handle the error gracefully and terminate
+		if response.FriendlyError != "" || response.Error != "" {
+			log.Debugln(response.Error)
+			log.Fatalln(response.FriendlyError)
+		}
+		var serverConfig services.BootController
+
+		err = json.Unmarshal(response.Payload, &serverConfig)
+		if err != nil {
+			log.Fatalf("%s", err.Error())
+		}
+		if outputFlag != "" {
+			err = ux.CheckOutFlag(outputFlag, NewResourceContainer("bootConfig", response.Payload))
+		} else {
+			ux.BootFormat(serverConfig.BootConfigs)
+		}
+	},
+}
+
+var getConfig = &cobra.Command{
+	Use:   "config",
+	Short: "Retrieve the Plunder server configuration from a Plunder instance",
+	Run: func(cmd *cobra.Command, args []string) {
+		// Parse through the flags and attempt to build a correct URL
+		log.SetLevel(log.Level(logLevel))
+
+		u, c, err := plunderapi.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+		if err != nil {
+			log.Fatalf("%s", err.Error())
+		}
+
+		u.Path = path.Join(u.Path, apiserver.ConfigAPIPath())
+
+		response, err := plunderapi.ParsePlunderGet(u, c)
+		if err != nil {
+			log.Fatalf("%s", err.Error())
+		}
+		// If an error has been returned then handle the error gracefully and terminate
+		if response.FriendlyError != "" || response.Error != "" {
+			log.Debugln(response.Error)
+			log.Fatalln(response.FriendlyError)
+		}
+		var serverConfig services.BootController
+
+		err = json.Unmarshal(response.Payload, &serverConfig)
+		if err != nil {
+			log.Fatalf("%s", err.Error())
+		}
+		if outputFlag != "" {
+			err = ux.CheckOutFlag(outputFlag, NewResourceContainer("serverConfig", response.Payload))
+		} else {
+			ux.ServerFormat(serverConfig)
+		}
 	},
 }
 
@@ -106,43 +181,6 @@ var getGlobal = &cobra.Command{
 			err = ux.CheckOutFlag(outputFlag, NewResourceContainer("globalConfig", globalConfigJSON))
 		} else {
 			ux.GlobalFormat(deployments.GlobalServerConfig)
-		}
-	},
-}
-
-var getConfig = &cobra.Command{
-	Use:   "config",
-	Short: "Retrieve the Plunder server configuration from a Plunder instance",
-	Run: func(cmd *cobra.Command, args []string) {
-		// Parse through the flags and attempt to build a correct URL
-		log.SetLevel(log.Level(logLevel))
-
-		u, c, err := plunderapi.BuildEnvironmentFromConfig(pathFlag, urlFlag)
-		if err != nil {
-			log.Fatalf("%s", err.Error())
-		}
-
-		u.Path = path.Join(u.Path, apiserver.ConfigAPIPath())
-
-		response, err := plunderapi.ParsePlunderGet(u, c)
-		if err != nil {
-			log.Fatalf("%s", err.Error())
-		}
-		// If an error has been returned then handle the error gracefully and terminate
-		if response.FriendlyError != "" || response.Error != "" {
-			log.Debugln(response.Error)
-			log.Fatalln(response.FriendlyError)
-		}
-		var serverConfig services.BootController
-
-		err = json.Unmarshal(response.Payload, &serverConfig)
-		if err != nil {
-			log.Fatalf("%s", err.Error())
-		}
-		if outputFlag != "" {
-			err = ux.CheckOutFlag(outputFlag, NewResourceContainer("serverConfig", response.Payload))
-		} else {
-			ux.ServerFormat(serverConfig)
 		}
 	},
 }
