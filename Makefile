@@ -51,9 +51,9 @@ docker:
 	@echo New Docker image created
 
 oui:
-	@echo Pulling from the oui database
+	@echo Pulling latest updates from the oui database
 	@mkdir -p pkg/oui
-	@echo -e "package oui\n\nconst ouiLookup='`curl http://standards-oui.ieee.org/oui.txt | grep "(hex)" | sort | tr -d "   (hex)"`\n'" > pkg/oui/lookup.go
+	@echo -e "package oui\n\nconst ouiLookup=\``curl http://standards-oui.ieee.org/oui.txt | grep "(hex)" | sort |  cut -c 1-8,17- | tr -d '\`'`\n\`" > pkg/oui/lookup.go
 
 all_releases:
 	@make release_darwin

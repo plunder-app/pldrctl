@@ -3,6 +3,8 @@ package oui
 import (
 	"bufio"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var hotLookup map[string]string
@@ -12,17 +14,40 @@ func init() {
 	hotLookup = make(map[string]string)
 }
 
-func lookupMacVendor(mac string) (string, error) {
-	if vendor, ok := hotLookup[mac]; !ok {
+// LookupMacVendor - will attempt to find a vendor in the hot cache or will search the large string
+func LookupMacVendor(mac string) string {
+
+	// Modify Mac address to use dashes (as per the oui.txt)
+	dashMac := strings.Replace(mac, ":", "-", -1)
+
+	// chop full MAC address to identifier
+	macIdentifier := string(dashMac[0:8])
+
+	// Search
+	if vendor, ok := hotLookup[macIdentifier]; !ok {
 		// Couldn't find it in the cache, look in the "cold" pool
+		log.Debugf("Mac address [%s] not found in cache", macIdentifier)
 		scanner := bufio.NewScanner(strings.NewReader(ouiLookup))
 		for scanner.Scan() {
-			//lines := append(lines, scanner.Text())
-			return vendor, nil
+			// Look line-by-line
+			FoundMAC := strings.Contains(scanner.Text(), macIdentifier)
+			if FoundMAC {
+				// Remove the prefix and the whitespaces
+				vendor := strings.TrimSpace(strings.TrimPrefix(scanner.Text(), macIdentifier))
+				// Add to cache
+				hotLookup[macIdentifier] = vendor
+				// Return the cold version
+				return vendor
+			}
 		}
-		err := scanner.Err()
-		return "", err
+	} else {
+		// Return the cached version
+		return vendor
 	}
-	return "", nil
+	return "" // Return a blank
 
 }
+
+// splint and add to cache
+
+//Return vendor
