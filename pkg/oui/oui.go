@@ -20,8 +20,8 @@ func LookupMacVendor(mac string) string {
 	// Modify Mac address to use dashes (as per the oui.txt)
 	dashMac := strings.Replace(mac, ":", "-", -1)
 
-	// chop full MAC address to identifier
-	macIdentifier := string(dashMac[0:8])
+	// chop full MAC address to identifier (also upper case)
+	macIdentifier := strings.ToUpper(string(dashMac[0:8]))
 
 	// Search
 	if vendor, ok := hotLookup[macIdentifier]; !ok {
