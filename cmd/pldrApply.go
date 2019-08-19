@@ -128,6 +128,20 @@ func parseApply(resourceDefinition string, resource json.RawMessage) error {
 			log.Debugln(response.Error)
 			log.Fatalln(response.FriendlyError)
 		}
+	case "parlay":
+		u.Path = path.Join(u.Path, apiserver.ParlayAPIPath())
+
+		// Apply the POST
+		response, err := plunderapi.ParsePlunderPost(u, c, resource)
+		if err != nil {
+			log.Fatalf("%s", err.Error())
+		}
+
+		// If an error has been returned then handle the error gracefully and terminate
+		if response.FriendlyError != "" || response.Error != "" {
+			log.Debugln(response.Error)
+			log.Fatalln(response.FriendlyError)
+		}
 	default:
 		return fmt.Errorf("Unknown resource Definition [%s]", resourceDefinition)
 
