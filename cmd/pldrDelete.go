@@ -27,10 +27,10 @@ var pldrctlDelete = &cobra.Command{
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
-		dashMac := strings.Replace(args[0], ":", "-", -1)
 		switch strings.ToLower(deleteTypeFlag) {
 		case "config":
 		case "deployment":
+			dashMac := strings.Replace(args[0], ":", "-", -1)
 
 			u.Path = path.Join(u.Path, apiserver.DeploymentAPIPath()+"/"+dashMac)
 
@@ -46,6 +46,20 @@ var pldrctlDelete = &cobra.Command{
 
 		case "deployments":
 		case "globalConfig":
+		case "logs":
+			dashAddress := strings.Replace(args[0], ":", "-", -1)
+
+			u.Path = path.Join(u.Path, apiserver.ParlayAPIPath()+"/logs/"+dashAddress)
+
+			response, err := plunderapi.ParsePlunderDelete(u, c)
+			if err != nil {
+				log.Fatalf("%s", err.Error())
+			}
+			// If an error has been returned then handle the error gracefully and terminate
+			if response.FriendlyError != "" || response.Error != "" {
+				log.Debugln(response.Error)
+				log.Fatalln(response.FriendlyError)
+			}
 		default:
 			log.Fatalf("Unknown resource type [%s]", deleteTypeFlag)
 

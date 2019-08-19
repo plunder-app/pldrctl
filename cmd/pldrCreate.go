@@ -27,7 +27,7 @@ func init() {
 //pldrctlCreate - is used for it's subcommands for pulling data from a plunder server
 var pldrctlCreate = &cobra.Command{
 	Use:   "create",
-	Short: "Apply a configuration to plunder",
+	Short: "Create a new configuration for plunder",
 	Run: func(cmd *cobra.Command, args []string) {
 		log.SetLevel(log.Level(logLevel))
 

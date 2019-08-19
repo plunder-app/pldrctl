@@ -32,6 +32,7 @@ func init() {
 	pldrctlCmd.AddCommand(pldrctlCreate)
 	pldrctlCmd.AddCommand(pldrctlDelete)
 	pldrctlCmd.AddCommand(pldrctlDescribe)
+	pldrctlCmd.AddCommand(pldrctlExec)
 	pldrctlCmd.AddCommand(pldrctlGet)
 	pldrctlCmd.AddCommand(pldrctlVersion)
 }
