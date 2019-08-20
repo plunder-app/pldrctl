@@ -5,7 +5,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/plunder-app/pldrctl/pkg/plunderapi"
 	"github.com/plunder-app/pldrctl/pkg/ux"
 	"github.com/plunder-app/plunder/pkg/apiserver"
 	"github.com/plunder-app/plunder/pkg/services"
@@ -39,7 +38,7 @@ var describeDeploymentBootProcess = &cobra.Command{
 
 		log.SetLevel(log.Level(logLevel))
 
-		u, c, err := plunderapi.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
@@ -47,7 +46,7 @@ var describeDeploymentBootProcess = &cobra.Command{
 
 		u.Path = path.Join(u.Path, apiserver.DeploymentAPIPath()+"/"+dashMac)
 
-		response, err := plunderapi.ParsePlunderGet(u, c)
+		response, err := apiserver.ParsePlunderGet(u, c)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
@@ -79,7 +78,7 @@ var describeDeployment = &cobra.Command{
 
 		log.SetLevel(log.Level(logLevel))
 
-		u, c, err := plunderapi.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
@@ -87,7 +86,7 @@ var describeDeployment = &cobra.Command{
 
 		u.Path = path.Join(u.Path, apiserver.DeploymentAPIPath()+"/"+dashMac)
 
-		response, err := plunderapi.ParsePlunderGet(u, c)
+		response, err := apiserver.ParsePlunderGet(u, c)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}

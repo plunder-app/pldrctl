@@ -4,7 +4,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/plunder-app/pldrctl/pkg/plunderapi"
 	"github.com/plunder-app/plunder/pkg/apiserver"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -23,7 +22,7 @@ var pldrctlDelete = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		log.SetLevel(log.Level(logLevel))
 
-		u, c, err := plunderapi.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
@@ -34,7 +33,7 @@ var pldrctlDelete = &cobra.Command{
 
 			u.Path = path.Join(u.Path, apiserver.DeploymentAPIPath()+"/"+dashMac)
 
-			response, err := plunderapi.ParsePlunderDelete(u, c)
+			response, err := apiserver.ParsePlunderDelete(u, c)
 			if err != nil {
 				log.Fatalf("%s", err.Error())
 			}
@@ -51,7 +50,7 @@ var pldrctlDelete = &cobra.Command{
 
 			u.Path = path.Join(u.Path, apiserver.ParlayAPIPath()+"/logs/"+dashAddress)
 
-			response, err := plunderapi.ParsePlunderDelete(u, c)
+			response, err := apiserver.ParsePlunderDelete(u, c)
 			if err != nil {
 				log.Fatalf("%s", err.Error())
 			}

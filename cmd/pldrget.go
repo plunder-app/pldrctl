@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/plunder-app/pldrctl/pkg/plunderapi"
 	"github.com/plunder-app/pldrctl/pkg/ux"
 
 	"github.com/plunder-app/plunder/pkg/apiserver"
@@ -48,14 +47,14 @@ var getBoot = &cobra.Command{
 		// Parse through the flags and attempt to build a correct URL
 		log.SetLevel(log.Level(logLevel))
 
-		u, c, err := plunderapi.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
 
 		u.Path = path.Join(u.Path, apiserver.ConfigAPIPath())
 
-		response, err := plunderapi.ParsePlunderGet(u, c)
+		response, err := apiserver.ParsePlunderGet(u, c)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
@@ -85,14 +84,14 @@ var getConfig = &cobra.Command{
 		// Parse through the flags and attempt to build a correct URL
 		log.SetLevel(log.Level(logLevel))
 
-		u, c, err := plunderapi.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
 
 		u.Path = path.Join(u.Path, apiserver.ConfigAPIPath())
 
-		response, err := plunderapi.ParsePlunderGet(u, c)
+		response, err := apiserver.ParsePlunderGet(u, c)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
@@ -122,14 +121,14 @@ var getDeployments = &cobra.Command{
 		// Parse through the flags and attempt to build a correct URL
 		log.SetLevel(log.Level(logLevel))
 
-		u, c, err := plunderapi.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
 
 		u.Path = path.Join(u.Path, apiserver.DeploymentsAPIPath())
 
-		response, err := plunderapi.ParsePlunderGet(u, c)
+		response, err := apiserver.ParsePlunderGet(u, c)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
@@ -161,14 +160,14 @@ var getGlobal = &cobra.Command{
 		// Parse through the flags and attempt to build a correct URL
 		log.SetLevel(log.Level(logLevel))
 
-		u, c, err := plunderapi.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
 
 		u.Path = path.Join(u.Path, apiserver.DeploymentsAPIPath())
 
-		response, err := plunderapi.ParsePlunderGet(u, c)
+		response, err := apiserver.ParsePlunderGet(u, c)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
@@ -199,7 +198,7 @@ var getLogs = &cobra.Command{
 	Short: "Retrieve the logs from a Parlay deployment",
 	Run: func(cmd *cobra.Command, args []string) {
 		log.SetLevel(log.Level(logLevel))
-		u, c, err := plunderapi.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
@@ -211,7 +210,7 @@ var getLogs = &cobra.Command{
 
 		u.Path = path.Join(u.Path, apiserver.ParlayAPIPath()+"/logs/"+dashAddress)
 		for {
-			response, err := plunderapi.ParsePlunderGet(u, c)
+			response, err := apiserver.ParsePlunderGet(u, c)
 			if err != nil {
 				log.Fatalf("%s", err.Error())
 			}
@@ -255,14 +254,14 @@ var getUnLeased = &cobra.Command{
 		// Parse through the flags and attempt to build a correct URL
 		log.SetLevel(log.Level(logLevel))
 
-		u, c, err := plunderapi.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
 
 		u.Path = path.Join(u.Path, apiserver.DHCPAPIPath()+"/unleased")
 
-		response, err := plunderapi.ParsePlunderGet(u, c)
+		response, err := apiserver.ParsePlunderGet(u, c)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}

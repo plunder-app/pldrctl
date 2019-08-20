@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"path"
 
-	"github.com/plunder-app/pldrctl/pkg/plunderapi"
 	"github.com/plunder-app/plunder/pkg/apiserver"
 	"github.com/plunder-app/plunder/pkg/parlay"
 	"github.com/plunder-app/plunder/pkg/parlay/types"
@@ -54,7 +53,7 @@ var pldrctlExec = &cobra.Command{
 		newMap.Deployments = append(newMap.Deployments, newDeployment)
 
 		// Pass the execution data to the API endpoint
-		u, c, err := plunderapi.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
@@ -64,7 +63,7 @@ var pldrctlExec = &cobra.Command{
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
-		response, err := plunderapi.ParsePlunderPost(u, c, b)
+		response, err := apiserver.ParsePlunderPost(u, c, b)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
