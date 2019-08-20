@@ -278,6 +278,10 @@ var getUnLeased = &cobra.Command{
 			log.Fatalf("%s", err.Error())
 		}
 
-		ux.LeasesGetFormat(unleased)
+		if outputFlag != "" {
+			err = ux.CheckOutFlag(outputFlag, NewResourceContainer("unleased", response.Payload))
+		} else {
+			ux.LeasesGetFormat(unleased)
+		}
 	},
 }
