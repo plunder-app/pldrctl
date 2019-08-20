@@ -5,7 +5,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/plunder-app/pldrctl/pkg/plunderapi"
 	"github.com/plunder-app/plunder/pkg/apiserver"
 	"github.com/plunder-app/plunder/pkg/services"
 	log "github.com/sirupsen/logrus"
@@ -31,7 +30,7 @@ var pldrctlCreate = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		log.SetLevel(log.Level(logLevel))
 
-		u, c, err := plunderapi.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
@@ -46,7 +45,7 @@ var pldrctlCreate = &cobra.Command{
 			if err != nil {
 				log.Fatalf("%s", err.Error())
 			}
-			response, err := plunderapi.ParsePlunderPost(u, c, b)
+			response, err := apiserver.ParsePlunderPost(u, c, b)
 			if err != nil {
 				log.Fatalf("%s", err.Error())
 			}

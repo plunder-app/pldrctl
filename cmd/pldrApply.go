@@ -10,7 +10,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/plunder-app/pldrctl/pkg/plunderapi"
 	"github.com/plunder-app/plunder/pkg/apiserver"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -77,7 +76,7 @@ var pldrctlApply = &cobra.Command{
 }
 
 func parseApply(resourceDefinition string, resource json.RawMessage) error {
-	u, c, err := plunderapi.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+	u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
 	if err != nil {
 		log.Fatalf("%s", err.Error())
 	}
@@ -90,7 +89,7 @@ func parseApply(resourceDefinition string, resource json.RawMessage) error {
 
 		u.Path = path.Join(u.Path, apiserver.DeploymentAPIPath())
 
-		response, err := plunderapi.ParsePlunderPost(u, c, resource)
+		response, err := apiserver.ParsePlunderPost(u, c, resource)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
@@ -105,7 +104,7 @@ func parseApply(resourceDefinition string, resource json.RawMessage) error {
 		u.Path = path.Join(u.Path, apiserver.DeploymentsAPIPath())
 
 		// Apply the POST
-		response, err := plunderapi.ParsePlunderPost(u, c, resource)
+		response, err := apiserver.ParsePlunderPost(u, c, resource)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
@@ -119,7 +118,7 @@ func parseApply(resourceDefinition string, resource json.RawMessage) error {
 		u.Path = path.Join(u.Path, apiserver.DeploymentAPIPath()+"/global")
 
 		// Apply the POST
-		response, err := plunderapi.ParsePlunderPost(u, c, resource)
+		response, err := apiserver.ParsePlunderPost(u, c, resource)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
@@ -132,7 +131,7 @@ func parseApply(resourceDefinition string, resource json.RawMessage) error {
 		u.Path = path.Join(u.Path, apiserver.ParlayAPIPath())
 
 		// Apply the POST
-		response, err := plunderapi.ParsePlunderPost(u, c, resource)
+		response, err := apiserver.ParsePlunderPost(u, c, resource)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
