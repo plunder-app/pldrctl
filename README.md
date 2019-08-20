@@ -147,6 +147,120 @@ $ pldrctl get deployments | grep newNode
 00:0f:4b:fe:41:54  preseed     newNode02  192.168.1.110
 ```
 
+### Remote Execution with pldrctl
+
+`pldrctl` can automate the deployment of applications or configuration of deployed servers in two different methods:
+
+#### Scripted automation with parlay
+
+The below file is the contents of kube_reset.yaml and is configured to remove pacakges and tidy up etc..
+
+```
+definition: parlay
+resource:
+  deployments:
+  - actions:
+    - command: kubeadm reset -f
+      commandSudo: root
+      name: Reset Kubernetes
+      type: command
+      ignoreFail: true
+    - command: dpkg -r kubeadm kubelet kubectl cri-tools kubernetes-cni
+      commandSudo: root
+      name: Remove packages
+      type: command
+    - command: rm -rf /opt/cni/bin
+      commandSudo: root
+      name: Remove any remaining cni directories 
+      type: command
+    hosts:
+    - 192.168.1.129
+    name: Reset any Kubernetes configuration (and remove packages)
+```
+
+We can apply this to plunder with `pldrctl` in the normal manner:
+
+`pldrctl apply -f ./kube_reset.yaml` 
+
+Plunder will examine the resource definition and execute the below actions on the hosts listed in the host array and follow the actions in order. 
+
+#### Viewing and Managing logs of the remote commands
+
+Plunder will keep all of the remote logs in-memory to be retrieved at a later date, we can view and delete these logs through the `pldrctl` utility.
+
+Using the `pldrctl get logs <address>` command we can pull the logs from the plunder server, below we can see the output from the above command. 
+
+```
+pldrctl get logs  192.168.1.129 
+Logs:
+Started: Tue Aug 20 08:47:42 2019	Task Name: Reset Kubernetes
+Output:
+[reset] Reading configuration from the cluster...
+[reset] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -oyaml'
+[preflight] Running pre-flight checks
+[reset] Removing info for node "master" from the ConfigMap "kubeadm-config" in the "kube-system" Namespace
+[reset] Stopping the kubelet service
+W0820 15:45:36.585713    2141 reset.go:158] [reset] failed to remove etcd member: error syncing endpoints with etc: etcdclient: no available endpoints
+.Please manually remove this etcd member using etcdctl
+[reset] unmounting mounted directories in "/var/lib/kubelet"
+[reset] Deleting contents of stateful directories: [/var/lib/etcd /var/lib/kubelet /etc/cni/net.d /var/lib/dockershim /var/run/kubernetes]
+[reset] Deleting contents of config directories: [/etc/kubernetes/manifests /etc/kubernetes/pki]
+[reset] Deleting files: [/etc/kubernetes/admin.conf /etc/kubernetes/kubelet.conf /etc/kubernetes/bootstrap-kubelet.conf /etc/kubernetes/controller-manager.conf /etc/kubernetes/scheduler.conf]
+
+The reset process does not reset or clean up iptables rules or IPVS tables.
+If you wish to reset iptables, you must do so manually.
+For example:
+iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
+
+If your cluster was setup to utilize IPVS, run ipvsadm --clear (or similar)
+to reset your system's IPVS tables.
+Started: Tue Aug 20 08:47:43 2019	Task Name: Remove packages
+Output:
+(Reading database ... 54421 files and directories currently installed.)
+Removing kubeadm (1.14.0-00) ...
+Removing kubelet (1.14.0-00) ...
+Removing kubectl (1.14.0-00) ...
+Removing cri-tools (1.12.0-00) ...
+Removing kubernetes-cni (0.7.5-00) ...
+dpkg: warning: while removing kubernetes-cni, directory '/opt/cni/bin' not empty so not removed
+Started: Tue Aug 20 08:47:43 2019	Task Name: Remove any remaining cni directories
+Output:
+[No Output]
+Task Status: Completed
+```
+
+We can also watch running execution with the following command:
+
+`kubectl get logs -w <timeout> <address>` 
+
+This command will keep refreshing the logs until the **Task Status:** changes from **Running**. 
+
+#### Single automation and deleting old logs
+
+On the same host we can delete all of the logs from `plunder` with the following command:
+
+`pldrctl delete -t <resource_type> <address>`
+
+Then we can run a single remote command with the following:
+
+`pldrctl exec -a <address> -c <command>`
+
+Below in an example of the same server from above:
+
+```
+pldrctl delete -t logs 192.168.1.129
+
+pldrctl exec -a 192.168.1.129 -c "uptime"
+
+pldrctl get logs  192.168.1.129 
+
+Logs:
+Started: Tue Aug 20 08:55:48 2019	Task Name: pldrctl command
+Output:
+ 15:53:46 up 16:15,  1 user,  load average: 0.03, 0.04, 0.07
+Task Status: Completed
+```
+
 ### Further awesome-ness with pldrctl
 
 We can dig deeper into whats happening a deployment by `describing` the boot process:
