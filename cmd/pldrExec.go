@@ -5,8 +5,7 @@ import (
 	"path"
 
 	"github.com/plunder-app/plunder/pkg/apiserver"
-	"github.com/plunder-app/plunder/pkg/parlay"
-	"github.com/plunder-app/plunder/pkg/parlay/types"
+	"github.com/plunder-app/plunder/pkg/parlay/parlaytypes"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -36,20 +35,20 @@ var pldrctlExec = &cobra.Command{
 			log.Fatalf("No Command was submitted")
 		}
 
-		newDeployment := parlay.Deployment{
+		newDeployment := parlaytypes.Deployment{
 			Name:     "pldrctl exec",
 			Parallel: false,
 		}
 		newDeployment.Hosts = append(newDeployment.Hosts, execHost)
 
-		action := types.Action{
+		action := parlaytypes.Action{
 			ActionType: "command",
 			Command:    execCommand,
 			Name:       "pldrctl command",
 		}
 		newDeployment.Actions = append(newDeployment.Actions, action)
 
-		var newMap parlay.TreasureMap
+		var newMap parlaytypes.TreasureMap
 		newMap.Deployments = append(newMap.Deployments, newDeployment)
 
 		// Pass the execution data to the API endpoint
