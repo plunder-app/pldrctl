@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"path"
-	"strings"
 
 	"github.com/plunder-app/plunder/pkg/apiserver"
 	"github.com/plunder-app/plunder/pkg/services"
@@ -13,14 +11,42 @@ import (
 
 var createTypeFlag string
 var deployment services.DeploymentConfig
+var bootConfig services.BootConfig
 
 func init() {
-	pldrctlCreate.Flags().StringVarP(&createTypeFlag, "type", "t", "", "Type of resource to create")
-	pldrctlCreate.Flags().StringVarP(&deployment.MAC, "mac", "m", "", "Mac Address of the resource to create")
-	pldrctlCreate.Flags().StringVarP(&deployment.ConfigName, "config", "c", "", "The config to apply to the new resource")
-	pldrctlCreate.Flags().StringVarP(&deployment.ConfigHost.IPAddress, "address", "a", "", "A Static address to apply to the new resource")
-	pldrctlCreate.Flags().StringVarP(&deployment.ConfigHost.ServerName, "serverName", "n", "", "The hostname to apply to the new resource")
+	pldrctlCreateBoot.Flags().StringVarP(&bootConfig.ConfigName, "name", "n", "default", "The name of the new boot configuration")
+	pldrctlCreateBoot.Flags().StringVarP(&bootConfig.Kernel, "kernel", "k", "", "The path of the kernel to be booted")
+	pldrctlCreateBoot.Flags().StringVarP(&bootConfig.Initrd, "initrd", "i", "", "The path of init ramdisk to be booted")
+	pldrctlCreateBoot.Flags().StringVarP(&bootConfig.Cmdline, "cmdline", "c", "", "Additional kernel commandline flags (optional)")
 
+	pldrctlCreateDeployment.Flags().StringVarP(&createTypeFlag, "type", "t", "", "Type of resource to create")
+	pldrctlCreateDeployment.Flags().StringVarP(&deployment.MAC, "mac", "m", "", "Mac Address of the resource to create")
+	pldrctlCreateDeployment.Flags().StringVarP(&deployment.ConfigName, "config", "c", "", "The config to apply to the new resource")
+	pldrctlCreateDeployment.Flags().StringVarP(&deployment.ConfigHost.IPAddress, "address", "a", "", "A Static address to apply to the new resource")
+	pldrctlCreateDeployment.Flags().StringVarP(&deployment.ConfigHost.ServerName, "serverName", "n", "", "The hostname to apply to the new resource")
+
+	pldrctlCreate.AddCommand(pldrctlCreateBoot)
+	pldrctlCreate.AddCommand(pldrctlCreateDeployment)
+
+}
+
+func createOperation(url string, data []byte) (resp *apiserver.Response) {
+	// Build the environment
+	u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+	if err != nil {
+		log.Fatalf("%s", err.Error())
+	}
+
+	// Build the URL
+	u.Path = url
+
+	// Run the Creation
+	resp, err = apiserver.ParsePlunderPost(u, c, data)
+	if err != nil {
+		log.Fatalf("%s", err.Error())
+	}
+
+	return
 }
 
 //pldrctlCreate - is used for it's subcommands for pulling data from a plunder server
@@ -30,37 +56,42 @@ var pldrctlCreate = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		log.SetLevel(log.Level(logLevel))
 
-		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+		cmd.Help()
+	},
+}
+
+//pldrctlCreateBoot - is used for it's subcommands for pulling data from a plunder server
+var pldrctlCreateBoot = &cobra.Command{
+	Use:   "boot",
+	Short: "Create a new boot configuration for plunder",
+	Run: func(cmd *cobra.Command, args []string) {
+		log.SetLevel(log.Level(logLevel))
+		b, err := json.Marshal(bootConfig)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
+		resp := createOperation(apiserver.ConfigAPIPath()+"/"+bootConfig.ConfigName, b)
+		if resp.FriendlyError != "" || resp.Error != "" {
+			log.Debugln(resp.Error)
+			log.Fatalln(resp.FriendlyError)
+		}
+	},
+}
 
-		switch strings.ToLower(createTypeFlag) {
-		case "boot":
-		case "config":
-		case "deployment":
-			// Call external function (TODO)
-			u.Path = path.Join(u.Path, apiserver.DeploymentAPIPath())
-			b, err := json.Marshal(deployment)
-			if err != nil {
-				log.Fatalf("%s", err.Error())
-			}
-			response, err := apiserver.ParsePlunderPost(u, c, b)
-			if err != nil {
-				log.Fatalf("%s", err.Error())
-			}
-			// If an error has been returned then handle the error gracefully and terminate
-			if response.FriendlyError != "" || response.Error != "" {
-				log.Debugln(response.Error)
-				log.Fatalln(response.FriendlyError)
-			}
-
-		case "deployments":
-		case "globalConfig":
-		default:
-			cmd.Help()
-			log.Fatalf("Unknown resource Definition [%s]", createTypeFlag)
-
+//pldrctlCreate - is used for it's subcommands for pulling data from a plunder server
+var pldrctlCreateDeployment = &cobra.Command{
+	Use:   "deployment",
+	Short: "Create a new deployment for plunder",
+	Run: func(cmd *cobra.Command, args []string) {
+		log.SetLevel(log.Level(logLevel))
+		b, err := json.Marshal(deployment)
+		if err != nil {
+			log.Fatalf("%s", err.Error())
+		}
+		resp := createOperation(apiserver.DeploymentAPIPath(), b)
+		if resp.FriendlyError != "" || resp.Error != "" {
+			log.Debugln(resp.Error)
+			log.Fatalln(resp.FriendlyError)
 		}
 	},
 }
