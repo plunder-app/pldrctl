@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"path"
 	"strings"
 
 	"github.com/plunder-app/plunder/pkg/apiserver"
@@ -12,56 +11,71 @@ import (
 var deleteTypeFlag string
 
 func init() {
+	pldrctlDelete.AddCommand(pldrctlDeleteDeployment)
+	pldrctlDelete.AddCommand(pldrctlDeleteLogs)
+
 	pldrctlDelete.Flags().StringVarP(&deleteTypeFlag, "type", "t", "", "Type of resource to create")
 }
 
-//pldrctlCreate - is used for it's subcommands for pulling data from a plunder server
+func deleteOperation(url string) (resp *apiserver.Response) {
+	// Build the environment
+	u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+	if err != nil {
+		log.Fatalf("%s", err.Error())
+	}
+
+	// Build the URL
+	u.Path = url
+
+	// Run the delete
+	resp, err = apiserver.ParsePlunderDelete(u, c)
+	if err != nil {
+		log.Fatalf("%s", err.Error())
+	}
+
+	return
+}
+
+//pldrctlDelete - is used for it's subcommands for pulling data from a plunder server
 var pldrctlDelete = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete a resource in Plunder",
 	Run: func(cmd *cobra.Command, args []string) {
 		log.SetLevel(log.Level(logLevel))
+		cmd.Help()
+	},
+}
 
-		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
-		if err != nil {
-			log.Fatalf("%s", err.Error())
+//pldrctlDeleteDeployment - is used for it's subcommands for pulling data from a plunder server
+var pldrctlDeleteDeployment = &cobra.Command{
+	Use:   "deployment",
+	Short: "Delete a a deployment in Plunder",
+	Run: func(cmd *cobra.Command, args []string) {
+		log.SetLevel(log.Level(logLevel))
+		if len(args) != 1 {
+			log.Fatalf("Only argument should be a MAC address to be removed")
 		}
-		switch strings.ToLower(deleteTypeFlag) {
-		case "config":
-		case "deployment":
-			dashMac := strings.Replace(args[0], ":", "-", -1)
+		resp := deleteOperation(apiserver.DeploymentAPIPath() + "/" + strings.Replace(args[0], ":", "-", -1))
+		if resp.FriendlyError != "" || resp.Error != "" {
+			log.Debugln(resp.Error)
+			log.Fatalln(resp.FriendlyError)
+		}
+	},
+}
 
-			u.Path = path.Join(u.Path, apiserver.DeploymentAPIPath()+"/"+dashMac)
-
-			response, err := apiserver.ParsePlunderDelete(u, c)
-			if err != nil {
-				log.Fatalf("%s", err.Error())
-			}
-			// If an error has been returned then handle the error gracefully and terminate
-			if response.FriendlyError != "" || response.Error != "" {
-				log.Debugln(response.Error)
-				log.Fatalln(response.FriendlyError)
-			}
-
-		case "deployments":
-		case "globalConfig":
-		case "logs":
-			dashAddress := strings.Replace(args[0], ":", "-", -1)
-
-			u.Path = path.Join(u.Path, apiserver.ParlayAPIPath()+"/logs/"+dashAddress)
-
-			response, err := apiserver.ParsePlunderDelete(u, c)
-			if err != nil {
-				log.Fatalf("%s", err.Error())
-			}
-			// If an error has been returned then handle the error gracefully and terminate
-			if response.FriendlyError != "" || response.Error != "" {
-				log.Debugln(response.Error)
-				log.Fatalln(response.FriendlyError)
-			}
-		default:
-			log.Fatalf("Unknown resource type [%s]", deleteTypeFlag)
-
+//pldrctlDeleteLogs - is used for it's subcommands for pulling data from a plunder server
+var pldrctlDeleteLogs = &cobra.Command{
+	Use:   "logs",
+	Short: "Delete logs from a deployment in Plunder",
+	Run: func(cmd *cobra.Command, args []string) {
+		log.SetLevel(log.Level(logLevel))
+		if len(args) != 1 {
+			log.Fatalf("Only argument should be an IP address to have it's logs removed")
+		}
+		resp := deleteOperation(apiserver.ParlayAPIPath() + "/logs/" + strings.Replace(args[0], ":", "-", -1))
+		if resp.FriendlyError != "" || resp.Error != "" {
+			log.Debugln(resp.Error)
+			log.Fatalln(resp.FriendlyError)
 		}
 	},
 }
