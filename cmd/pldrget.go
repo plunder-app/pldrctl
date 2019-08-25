@@ -18,11 +18,13 @@ import (
 
 var watch int
 
+var colour bool
+
 func init() {
 	pldrctlGet.PersistentFlags().StringVar(&urlFlag, "url", os.Getenv("pURL"), "The Url of a plunder server")
 
 	getLogs.Flags().IntVarP(&watch, "watch", "w", 0, "Setting a watch timeout until \"completion\" or \"fail\"")
-
+	getUnLeased.Flags().BoolVarP(&colour, "colour", "c", false, "Use Colourful output")
 	pldrctlGet.AddCommand(getBoot)
 	pldrctlGet.AddCommand(getDeployments)
 	pldrctlGet.AddCommand(getGlobal)
@@ -280,7 +282,7 @@ var getUnLeased = &cobra.Command{
 		if outputFlag != "" {
 			err = ux.CheckOutFlag(outputFlag, NewResourceContainer("unleased", response.Payload))
 		} else {
-			ux.LeasesGetFormat(unleased)
+			ux.LeasesGetFormat(unleased, colour)
 		}
 	},
 }
