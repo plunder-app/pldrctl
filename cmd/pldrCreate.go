@@ -18,6 +18,8 @@ func init() {
 	pldrctlCreateBoot.Flags().StringVarP(&bootConfig.Kernel, "kernel", "k", "", "The path of the kernel to be booted")
 	pldrctlCreateBoot.Flags().StringVarP(&bootConfig.Initrd, "initrd", "i", "", "The path of init ramdisk to be booted")
 	pldrctlCreateBoot.Flags().StringVarP(&bootConfig.Cmdline, "cmdline", "c", "", "Additional kernel commandline flags (optional)")
+	pldrctlCreateBoot.Flags().StringVar(&bootConfig.ISOPath, "isoPath", "", "The path of an ISO to read from (optional)")
+	pldrctlCreateBoot.Flags().StringVar(&bootConfig.ISOPrefix, "isoPrefix", "", "The prefix to bind the ISO too (optional)")
 
 	pldrctlCreateDeployment.Flags().StringVarP(&createTypeFlag, "type", "t", "", "Type of resource to create")
 	pldrctlCreateDeployment.Flags().StringVarP(&deployment.MAC, "mac", "m", "", "Mac Address of the resource to create")
