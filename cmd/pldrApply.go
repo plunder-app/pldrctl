@@ -60,13 +60,13 @@ var pldrctlApply = &cobra.Command{
 		if len(output) == 0 {
 			log.Fatalf("No data could be read")
 		}
-		resource, rawJSON, err := UnPackResourceContainer(output)
+		resource, err := UnPackResourceContainer(output)
 		if err != nil {
 			cmd.Help()
 			log.Fatalln(err)
 		}
 
-		err = parseApply(resource, rawJSON)
+		err = parseApply(resource.Definition, resource.Resource)
 		if err != nil {
 			cmd.Help()
 
