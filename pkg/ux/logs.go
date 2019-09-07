@@ -36,3 +36,21 @@ func LogsGetFormat(logs plunderlogging.JSONLog) {
 	}
 
 }
+
+//LogsStreamFormat -
+func LogsStreamFormat(logEntry plunderlogging.JSONLogEntry) {
+
+	color.White.Printf("Logs:\n")
+	color.Green.Printf("Started: ")
+	color.White.Printf("%s\t", logEntry.Created.Format(time.ANSIC))
+	color.Green.Printf("Task Name: ")
+	color.White.Printf("%s\n", logEntry.TaskName)
+	if logEntry.Entry != "" {
+		color.Green.Printf("Output:\n")
+		color.White.Printf("%s\n", logEntry.Entry)
+	}
+	if logEntry.Err != "" {
+		color.Red.Printf("Error:\n")
+		color.White.Printf("%s\n", logEntry.Err)
+	}
+}

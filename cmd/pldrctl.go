@@ -35,6 +35,8 @@ func init() {
 	pldrctlCmd.AddCommand(pldrctlExec)
 	pldrctlCmd.AddCommand(pldrctlGet)
 	pldrctlCmd.AddCommand(pldrctlVersion)
+	pldrctlCmd.AddCommand(pldrctlWatch)
+
 }
 
 // Execute - starts the command parsing process
