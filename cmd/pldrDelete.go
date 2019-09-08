@@ -8,13 +8,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var deleteTypeFlag string
-
 func init() {
+
+	pldrctlDelete.AddCommand(pldrctlDeleteBoot)
 	pldrctlDelete.AddCommand(pldrctlDeleteDeployment)
 	pldrctlDelete.AddCommand(pldrctlDeleteLogs)
 
-	pldrctlDelete.Flags().StringVarP(&deleteTypeFlag, "type", "t", "", "Type of resource to create")
 }
 
 func deleteOperation(url string) (resp *apiserver.Response) {
@@ -73,6 +72,23 @@ var pldrctlDeleteLogs = &cobra.Command{
 			log.Fatalf("Only argument should be an IP address to have it's logs removed")
 		}
 		resp := deleteOperation(apiserver.ParlayAPIPath() + "/logs/" + strings.Replace(args[0], ":", "-", -1))
+		if resp.FriendlyError != "" || resp.Error != "" {
+			log.Debugln(resp.Error)
+			log.Fatalln(resp.FriendlyError)
+		}
+	},
+}
+
+//pldrctlDeleteBoot - is used for it's subcommands for pulling data from a plunder server
+var pldrctlDeleteBoot = &cobra.Command{
+	Use:   "boot",
+	Short: "Delete boot configuration from Plunder",
+	Run: func(cmd *cobra.Command, args []string) {
+		log.SetLevel(log.Level(logLevel))
+		if len(args) != 1 {
+			log.Fatalf("Only argument should be an IP address to have it's logs removed")
+		}
+		resp := deleteOperation(apiserver.ConfigAPIPath() + "/" + args[0])
 		if resp.FriendlyError != "" || resp.Error != "" {
 			log.Debugln(resp.Error)
 			log.Fatalln(resp.FriendlyError)
