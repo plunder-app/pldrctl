@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"net/http"
+	"path"
 	"strings"
 
 	"github.com/plunder-app/plunder/pkg/apiserver"
@@ -16,24 +18,24 @@ func init() {
 
 }
 
-func deleteOperation(url string) (resp *apiserver.Response) {
-	// Build the environment
-	u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
-	if err != nil {
-		log.Fatalf("%s", err.Error())
-	}
+// func deleteOperation(url string) (resp *apiserver.Response) {
+// 	// Build the environment
+// 	u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+// 	if err != nil {
+// 		log.Fatalf("%s", err.Error())
+// 	}
 
-	// Build the URL
-	u.Path = url
+// 	// Build the URL
+// 	u.Path = url
 
-	// Run the delete
-	resp, err = apiserver.ParsePlunderDelete(u, c)
-	if err != nil {
-		log.Fatalf("%s", err.Error())
-	}
+// 	// Run the delete
+// 	resp, err = apiserver.ParsePlunderDelete(u, c)
+// 	if err != nil {
+// 		log.Fatalf("%s", err.Error())
+// 	}
 
-	return
-}
+// 	return
+// }
 
 //pldrctlDelete - is used for it's subcommands for pulling data from a plunder server
 var pldrctlDelete = &cobra.Command{
@@ -54,10 +56,25 @@ var pldrctlDeleteDeployment = &cobra.Command{
 		if len(args) != 1 {
 			log.Fatalf("Only argument should be a MAC address to be removed")
 		}
-		resp := deleteOperation(apiserver.DeploymentAPIPath() + "/" + strings.Replace(args[0], ":", "-", -1))
-		if resp.FriendlyError != "" || resp.Error != "" {
-			log.Debugln(resp.Error)
-			log.Fatalln(resp.FriendlyError)
+
+		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+		if err != nil {
+			log.Fatalf("%s", err.Error())
+		}
+
+		ep, resp := apiserver.FindFunctionEndpoint(u, c, "deploymentID", http.MethodDelete)
+		if resp.Error != "" {
+			log.Debug(resp.Error)
+			log.Fatalf(resp.FriendlyError)
+		}
+
+		u.Path = path.Join(u.Path, ep.Path+"/"+strings.Replace(args[0], ":", "-", -1))
+
+		response, err := apiserver.ParsePlunderDelete(u, c)
+
+		if response.FriendlyError != "" || response.Error != "" {
+			log.Debugln(response.Error)
+			log.Fatalln(response.FriendlyError)
 		}
 	},
 }
@@ -65,16 +82,31 @@ var pldrctlDeleteDeployment = &cobra.Command{
 //pldrctlDeleteLogs - is used for it's subcommands for pulling data from a plunder server
 var pldrctlDeleteLogs = &cobra.Command{
 	Use:   "logs",
-	Short: "Delete logs from a deployment in Plunder",
+	Short: "Delete Parlay logs from a deployment in Plunder",
 	Run: func(cmd *cobra.Command, args []string) {
 		log.SetLevel(log.Level(logLevel))
 		if len(args) != 1 {
 			log.Fatalf("Only argument should be an IP address to have it's logs removed")
 		}
-		resp := deleteOperation(apiserver.ParlayAPIPath() + "/logs/" + strings.Replace(args[0], ":", "-", -1))
-		if resp.FriendlyError != "" || resp.Error != "" {
-			log.Debugln(resp.Error)
-			log.Fatalln(resp.FriendlyError)
+
+		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+		if err != nil {
+			log.Fatalf("%s", err.Error())
+		}
+
+		ep, resp := apiserver.FindFunctionEndpoint(u, c, "parlayLogs", http.MethodDelete)
+		if resp.Error != "" {
+			log.Debug(resp.Error)
+			log.Fatalf(resp.FriendlyError)
+		}
+
+		u.Path = path.Join(u.Path, ep.Path+"/"+strings.Replace(args[0], ":", "-", -1))
+
+		response, err := apiserver.ParsePlunderDelete(u, c)
+
+		if response.FriendlyError != "" || response.Error != "" {
+			log.Debugln(response.Error)
+			log.Fatalln(response.FriendlyError)
 		}
 	},
 }
@@ -88,10 +120,23 @@ var pldrctlDeleteBoot = &cobra.Command{
 		if len(args) != 1 {
 			log.Fatalf("Only argument should be an IP address to have it's logs removed")
 		}
-		resp := deleteOperation(apiserver.ConfigAPIPath() + "/" + args[0])
-		if resp.FriendlyError != "" || resp.Error != "" {
-			log.Debugln(resp.Error)
-			log.Fatalln(resp.FriendlyError)
+		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+		if err != nil {
+			log.Fatalf("%s", err.Error())
+		}
+
+		ep, resp := apiserver.FindFunctionEndpoint(u, c, "configBoot", http.MethodDelete)
+		if resp.Error != "" {
+			log.Debug(resp.Error)
+			log.Fatalf(resp.FriendlyError)
+		}
+
+		u.Path = path.Join(ep.Path + "/" + args[0])
+
+		response, err := apiserver.ParsePlunderDelete(u, c)
+		if response.FriendlyError != "" || response.Error != "" {
+			log.Debugln(response.Error)
+			log.Fatalln(response.FriendlyError)
 		}
 	},
 }

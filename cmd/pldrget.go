@@ -25,6 +25,8 @@ func init() {
 
 	getLogs.Flags().IntVarP(&watch, "watch", "w", 0, "Setting a watch timeout until \"completion\" or \"fail\"")
 	getUnLeased.Flags().BoolVarP(&colour, "colour", "c", false, "Use Colourful output")
+
+	pldrctlGet.AddCommand(getAPI)
 	pldrctlGet.AddCommand(getBoot)
 	pldrctlGet.AddCommand(getDeployments)
 	pldrctlGet.AddCommand(getGlobal)
@@ -42,6 +44,44 @@ var pldrctlGet = &cobra.Command{
 	},
 }
 
+var getAPI = &cobra.Command{
+	Use:   "api",
+	Short: "Retrieve the API ",
+	Run: func(cmd *cobra.Command, args []string) {
+		// Parse through the flags and attempt to build a correct URL
+		log.SetLevel(log.Level(logLevel))
+
+		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+		if err != nil {
+			log.Fatalf("%s", err.Error())
+		}
+
+		u.Path = path.Join(u.Path, apiserver.FunctionPath())
+
+		response, err := apiserver.ParsePlunderGet(u, c)
+		if err != nil {
+			log.Fatalf("%s", err.Error())
+		}
+		// If an error has been returned then handle the error gracefully and terminate
+		if response.FriendlyError != "" || response.Error != "" {
+			log.Debugln(response.Error)
+			log.Fatalln(response.FriendlyError)
+		}
+		var endpoints []apiserver.EndPoint
+
+		err = json.Unmarshal(response.Payload, &endpoints)
+		if err != nil {
+			log.Fatalf("%s", err.Error())
+		}
+		if outputFlag != "" {
+			err = ux.CheckOutFlag(outputFlag, NewResourceContainer("api", response.Payload))
+		} else {
+			// TODO - User Interface for APIs
+			//ux.BootFormat(serverConfig.BootConfigs)
+		}
+	},
+}
+
 var getBoot = &cobra.Command{
 	Use:   "boot",
 	Short: "Retrieve the Plunder server boot configuration from a Plunder instance",
@@ -54,7 +94,13 @@ var getBoot = &cobra.Command{
 			log.Fatalf("%s", err.Error())
 		}
 
-		u.Path = path.Join(u.Path, apiserver.ConfigAPIPath())
+		ep, resp := apiserver.FindFunctionEndpoint(u, c, "config", "GET")
+		if resp.Error != "" {
+			log.Debug(resp.Error)
+			log.Fatalf(resp.FriendlyError)
+		}
+
+		u.Path = path.Join(u.Path, ep.Path)
 
 		response, err := apiserver.ParsePlunderGet(u, c)
 		if err != nil {
@@ -90,8 +136,13 @@ var getConfig = &cobra.Command{
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
+		ep, resp := apiserver.FindFunctionEndpoint(u, c, "config", "GET")
+		if resp.Error != "" {
+			log.Debug(resp.Error)
+			log.Fatalf(resp.FriendlyError)
+		}
 
-		u.Path = path.Join(u.Path, apiserver.ConfigAPIPath())
+		u.Path = path.Join(u.Path, ep.Path)
 
 		response, err := apiserver.ParsePlunderGet(u, c)
 		if err != nil {
@@ -125,14 +176,19 @@ var getDeployments = &cobra.Command{
 
 		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
 		if err != nil {
-			log.Fatalf("%s", err.Error())
+			log.Fatal(err)
+		}
+		ep, resp := apiserver.FindFunctionEndpoint(u, c, "deployments", "GET")
+		if resp.Error != "" {
+			log.Debug(resp.Error)
+			log.Fatalf(resp.FriendlyError)
 		}
 
-		u.Path = path.Join(u.Path, apiserver.DeploymentsAPIPath())
+		u.Path = path.Join(u.Path, ep.Path)
 
 		response, err := apiserver.ParsePlunderGet(u, c)
 		if err != nil {
-			log.Fatalf("%s", err.Error())
+			log.Fatal(err)
 		}
 		// If an error has been returned then handle the error gracefully and terminate
 		if response.FriendlyError != "" || response.Error != "" {
@@ -144,7 +200,7 @@ var getDeployments = &cobra.Command{
 
 		err = json.Unmarshal(response.Payload, &deployments)
 		if err != nil {
-			log.Fatalf("%s", err.Error())
+			log.Fatal(err)
 		}
 
 		if outputFlag != "" {
@@ -161,17 +217,22 @@ var getGlobal = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Parse through the flags and attempt to build a correct URL
 		log.SetLevel(log.Level(logLevel))
-
 		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
 		if err != nil {
-			log.Fatalf("%s", err.Error())
+			log.Fatal(err)
 		}
 
-		u.Path = path.Join(u.Path, apiserver.DeploymentsAPIPath())
+		ep, resp := apiserver.FindFunctionEndpoint(u, c, "deployments", "GET")
+		if resp.Error != "" {
+			log.Debug(resp.Error)
+			log.Fatalf(resp.FriendlyError)
+		}
+
+		u.Path = path.Join(u.Path, ep.Path)
 
 		response, err := apiserver.ParsePlunderGet(u, c)
 		if err != nil {
-			log.Fatalf("%s", err.Error())
+			log.Fatal(err)
 		}
 		// If an error has been returned then handle the error gracefully and terminate
 		if response.FriendlyError != "" || response.Error != "" {
@@ -179,10 +240,9 @@ var getGlobal = &cobra.Command{
 			log.Fatalln(response.FriendlyError)
 		}
 		var deployments services.DeploymentConfigurationFile
-
 		err = json.Unmarshal(response.Payload, &deployments)
 		if err != nil {
-			log.Fatalf("%s", err.Error())
+			log.Fatal(err)
 		}
 
 		globalConfigJSON, _ := json.Marshal(deployments.GlobalServerConfig)
@@ -210,7 +270,14 @@ var getLogs = &cobra.Command{
 
 		dashAddress := strings.Replace(args[0], ".", "-", -1)
 
-		u.Path = path.Join(u.Path, apiserver.ParlayAPIPath()+"/logs/"+dashAddress)
+		ep, resp := apiserver.FindFunctionEndpoint(u, c, "parlayLog", "GET")
+		if resp.Error != "" {
+			log.Debug(resp.Error)
+			log.Fatalf(resp.FriendlyError)
+		}
+
+		u.Path = path.Join(u.Path, ep.Path+"/"+dashAddress)
+
 		for {
 			response, err := apiserver.ParsePlunderGet(u, c)
 			if err != nil {
@@ -261,7 +328,13 @@ var getUnLeased = &cobra.Command{
 			log.Fatalf("%s", err.Error())
 		}
 
-		u.Path = path.Join(u.Path, apiserver.DHCPAPIPath()+"/unleased")
+		ep, resp := apiserver.FindFunctionEndpoint(u, c, "dhcp", "GET")
+		if resp.Error != "" {
+			log.Debug(resp.Error)
+			log.Fatalf(resp.FriendlyError)
+		}
+
+		u.Path = ep.Path + "/unleased"
 
 		response, err := apiserver.ParsePlunderGet(u, c)
 		if err != nil {
