@@ -43,8 +43,13 @@ var describeDeploymentBootProcess = &cobra.Command{
 			log.Fatalf("%s", err.Error())
 		}
 		dashMac := strings.Replace(args[0], ":", "-", -1)
+		ep, resp := apiserver.FindFunctionEndpoint(u, c, "deployment", "GET")
+		if resp.Error != "" {
+			log.Debug(resp.Error)
+			log.Fatalf(resp.FriendlyError)
+		}
 
-		u.Path = path.Join(u.Path, apiserver.DeploymentAPIPath()+"/"+dashMac)
+		u.Path = path.Join(u.Path, ep.Path+"/"+dashMac)
 
 		response, err := apiserver.ParsePlunderGet(u, c)
 		if err != nil {
@@ -84,7 +89,13 @@ var describeDeployment = &cobra.Command{
 		}
 		dashMac := strings.Replace(args[0], ":", "-", -1)
 
-		u.Path = path.Join(u.Path, apiserver.DeploymentAPIPath()+"/"+dashMac)
+		ep, resp := apiserver.FindFunctionEndpoint(u, c, "deployment", "GET")
+		if resp.Error != "" {
+			log.Debug(resp.Error)
+			log.Fatalf(resp.FriendlyError)
+		}
+
+		u.Path = path.Join(u.Path, ep.Path+"/"+dashMac)
 
 		response, err := apiserver.ParsePlunderGet(u, c)
 		if err != nil {

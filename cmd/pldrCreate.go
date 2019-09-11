@@ -32,25 +32,6 @@ func init() {
 
 }
 
-func createOperation(url string, data []byte) (resp *apiserver.Response) {
-	// Build the environment
-	u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
-	if err != nil {
-		log.Fatalf("%s", err.Error())
-	}
-
-	// Build the URL
-	u.Path = url
-
-	// Run the Creation
-	resp, err = apiserver.ParsePlunderPost(u, c, data)
-	if err != nil {
-		log.Fatalf("%s", err.Error())
-	}
-
-	return
-}
-
 //pldrctlCreate - is used for it's subcommands for pulling data from a plunder server
 var pldrctlCreate = &cobra.Command{
 	Use:   "create",
@@ -72,11 +53,26 @@ var pldrctlCreateBoot = &cobra.Command{
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
-		resp := createOperation(apiserver.ConfigAPIPath()+"/"+bootConfig.ConfigName, b)
-		if resp.FriendlyError != "" || resp.Error != "" {
-			log.Debugln(resp.Error)
-			log.Fatalln(resp.FriendlyError)
+		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+		if err != nil {
+			log.Fatalf("%s", err.Error())
 		}
+		ep, resp := apiserver.FindFunctionEndpoint(u, c, "configBoot", "POST")
+		if resp.Error != "" {
+			log.Debug(resp.Error)
+			log.Fatalf(resp.FriendlyError)
+		}
+		u.Path = ep.Path + "/" + bootConfig.ConfigName
+
+		response, err := apiserver.ParsePlunderPost(u, c, b)
+		if err != nil {
+			log.Fatalf("%s", err.Error())
+		}
+		if response.FriendlyError != "" || response.Error != "" {
+			log.Debugln(response.Error)
+			log.Fatalln(response.FriendlyError)
+		}
+
 	},
 }
 
@@ -90,10 +86,27 @@ var pldrctlCreateDeployment = &cobra.Command{
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
-		resp := createOperation(apiserver.DeploymentAPIPath(), b)
-		if resp.FriendlyError != "" || resp.Error != "" {
-			log.Debugln(resp.Error)
-			log.Fatalln(resp.FriendlyError)
+		// Build the environment
+		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+		if err != nil {
+			log.Fatalf("%s", err.Error())
 		}
+		ep, resp := apiserver.FindFunctionEndpoint(u, c, "deployment", "POST")
+		if resp.Error != "" {
+			log.Debug(resp.Error)
+			log.Fatalf(resp.FriendlyError)
+		}
+		u.Path = ep.Path
+
+		response, err := apiserver.ParsePlunderPost(u, c, b)
+		if err != nil {
+			log.Fatalf("%s", err.Error())
+		}
+
+		if response.FriendlyError != "" || response.Error != "" {
+			log.Debugln(response.Error)
+			log.Fatalln(response.FriendlyError)
+		}
+
 	},
 }

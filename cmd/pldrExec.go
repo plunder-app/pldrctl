@@ -57,7 +57,12 @@ var pldrctlExec = &cobra.Command{
 			log.Fatalf("%s", err.Error())
 		}
 
-		u.Path = path.Join(u.Path, apiserver.ParlayAPIPath())
+		ep, resp := apiserver.FindFunctionEndpoint(u, c, "parlay", "POST")
+		if resp.Error != "" {
+			log.Debug(resp.Error)
+			log.Fatalf(resp.FriendlyError)
+		}
+		u.Path = path.Join(u.Path, ep.Path)
 		b, err := json.Marshal(newMap)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
