@@ -82,6 +82,16 @@ var pldrctlCreateDeployment = &cobra.Command{
 	Short: "Create a new deployment for plunder",
 	Run: func(cmd *cobra.Command, args []string) {
 		log.SetLevel(log.Level(logLevel))
+		if deployment.MAC == "" {
+			cmd.Help()
+			log.Fatalf("The MAC address is a required field")
+		}
+
+		if deployment.ConfigHost.IPAddress == "" {
+			cmd.Help()
+			log.Fatalf("The IP address is a required field")
+		}
+
 		b, err := json.Marshal(deployment)
 		if err != nil {
 			log.Fatalf("%s", err.Error())

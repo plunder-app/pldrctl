@@ -76,6 +76,10 @@ var pldrctlHTTP = &cobra.Command{
 		// Parse through the flags and attempt to build a correct URL
 		log.SetLevel(log.Level(logLevel))
 
+		if len(args) != 1 {
+			log.Fatalf("Only argument should be an IP address to be watched")
+		}
+
 		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
 		if err != nil {
 			log.Fatalf("%s", err.Error())
@@ -94,7 +98,7 @@ var pldrctlHTTP = &cobra.Command{
 			if err := logDecoder.Decode(&logs); err == io.EOF {
 				break
 			} else if err != nil {
-				log.Debugf("%s\n", resp.Body)
+				log.Debugf("%v\n", resp.Status)
 
 				log.Fatal(err)
 			}

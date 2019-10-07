@@ -89,7 +89,7 @@ var describeDeployment = &cobra.Command{
 		}
 		dashMac := strings.Replace(args[0], ":", "-", -1)
 
-		ep, resp := apiserver.FindFunctionEndpoint(u, c, "deployment", "GET")
+		ep, resp := apiserver.FindFunctionEndpoint(u, c, "deploymentID", "GET")
 		if resp.Error != "" {
 			log.Debug(resp.Error)
 			log.Fatalf(resp.FriendlyError)
