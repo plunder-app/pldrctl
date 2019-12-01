@@ -33,8 +33,8 @@ func LeasesGetFormat(leases []services.Lease, noColour bool) {
 		}
 		// Build output template
 		fmt.Fprintf(w, format,
-			leases[i].Nic,                                       // Mac Address
-			oui.LookupMacVendor(leases[i].Nic),                  // Vendor
+			leases[i].MAC,                                       // Mac Address
+			oui.LookupMacVendor(leases[i].MAC),                  // Vendor
 			leases[i].Expiry.Format("Mon Jan _2 15:04:05 2006"), // Time Added
 			time.Since(leases[i].Expiry).Truncate(time.Second))  // Time last seen
 	}

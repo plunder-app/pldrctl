@@ -94,7 +94,7 @@ var pldrctlDeleteLogs = &cobra.Command{
 			log.Fatalf("%s", err.Error())
 		}
 
-		ep, resp := apiserver.FindFunctionEndpoint(u, c, "parlayLogs", http.MethodDelete)
+		ep, resp := apiserver.FindFunctionEndpoint(u, c, "parlayLog", http.MethodDelete)
 		if resp.Error != "" {
 			log.Debug(resp.Error)
 			log.Fatalf(resp.FriendlyError)
