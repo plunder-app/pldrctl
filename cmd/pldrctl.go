@@ -22,7 +22,7 @@ var urlFlag, pathFlag string
 var outputFlag string
 
 func init() {
-	pldrctlCmd.PersistentFlags().StringVarP(&outputFlag, "output", "o", "", "The Url of a plunder server")
+	pldrctlCmd.PersistentFlags().StringVarP(&outputFlag, "output", "o", "", "The type of output [json|yaml]")
 
 	pldrctlCmd.PersistentFlags().IntVar(&logLevel, "logLevel", int(log.InfoLevel), "Set the logging level [0=panic, 3=warning, 5=debug]")
 	pldrctlCmd.PersistentFlags().StringVarP(&pathFlag, "path", "p", "plunderclient.yaml", "Path to a custom Plunder Server configuation")

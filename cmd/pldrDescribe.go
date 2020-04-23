@@ -31,6 +31,10 @@ var describeDeploymentBootProcess = &cobra.Command{
 	Use:   "boot",
 	Short: "Describe the boot process for a deployment (through it's MAC address)",
 	Run: func(cmd *cobra.Command, args []string) {
+
+		// TODO - Needs implementing
+		log.Fatalf("Currently not implemented")
+
 		// Parse through the flags and attempt to build a correct URL
 		if len(args) != 1 {
 			log.Fatalf("Only argument should be a MAC address to be described")

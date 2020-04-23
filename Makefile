@@ -58,6 +58,7 @@ oui:
 all_releases:
 	@make release_darwin
 	@make release_linux
+	@make release_linux_arm
 	@make release_windows
 
 release_darwin:
@@ -67,9 +68,15 @@ release_darwin:
 	@rm $(TARGET)
 
 release_linux:
-	@echo Creating Linux Build
-	@GOOS=linux make build
-	@zip -9 -r $(TARGET)-linux-$(VERSION).zip ./$(TARGET) 
+	@echo Creating Linux amd64 Build
+	@GOOS=linux GOARCH=amd64 make build
+	@zip -9 -r $(TARGET)-linux-amd64-$(VERSION).zip ./$(TARGET) 
+	@rm $(TARGET)
+
+release_linux_arm:
+	@echo Creating Linux Arm Build
+	@GOOS=linux GOARCH=arm64 make build
+	@zip -9 -r $(TARGET)-linux-armv64-$(VERSION).zip ./$(TARGET) 
 	@rm $(TARGET)
 
 release_windows:
