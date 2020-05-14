@@ -48,10 +48,7 @@ var describeDeploymentBootProcess = &cobra.Command{
 		}
 		dashMac := strings.Replace(args[0], ":", "-", -1)
 		ep, resp := apiserver.FindFunctionEndpoint(u, c, "deployment", "GET")
-		if resp.Error != "" {
-			log.Debug(resp.Error)
-			log.Fatalf(resp.FriendlyError)
-		}
+		parseResponseError(resp)
 
 		u.Path = path.Join(u.Path, ep.Path+"/"+dashMac)
 
@@ -59,12 +56,8 @@ var describeDeploymentBootProcess = &cobra.Command{
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
-		// If an error has been returned then handle the error gracefully and terminate
-		if response.FriendlyError != "" || response.Error != "" {
-			log.Debugln(response.Error)
-			log.Fatalln(response.FriendlyError)
+		parseResponseError(response)
 
-		}
 		var deployment services.DeploymentConfig
 
 		err = json.Unmarshal(response.Payload, &deployment)
@@ -94,10 +87,7 @@ var describeDeployment = &cobra.Command{
 		dashMac := strings.Replace(args[0], ":", "-", -1)
 
 		ep, resp := apiserver.FindFunctionEndpoint(u, c, "deploymentID", "GET")
-		if resp.Error != "" {
-			log.Debug(resp.Error)
-			log.Fatalf(resp.FriendlyError)
-		}
+		parseResponseError(resp)
 
 		u.Path = path.Join(u.Path, ep.Path+"/"+dashMac)
 
@@ -106,11 +96,8 @@ var describeDeployment = &cobra.Command{
 			log.Fatalf("%s", err.Error())
 		}
 		// If an error has been returned then handle the error gracefully and terminate
-		if response.FriendlyError != "" || response.Error != "" {
-			log.Debugln(response.Error)
-			log.Fatalln(response.FriendlyError)
+		parseResponseError(response)
 
-		}
 		var deployment services.DeploymentConfig
 
 		err = json.Unmarshal(response.Payload, &deployment)

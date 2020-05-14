@@ -62,11 +62,8 @@ var getAPI = &cobra.Command{
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
-		// If an error has been returned then handle the error gracefully and terminate
-		if response.FriendlyError != "" || response.Error != "" {
-			log.Debugln(response.Error)
-			log.Fatalln(response.FriendlyError)
-		}
+		parseResponseError(response)
+
 		var endpoints []apiserver.EndPoint
 
 		err = json.Unmarshal(response.Payload, &endpoints)
@@ -95,10 +92,7 @@ var getBoot = &cobra.Command{
 		}
 
 		ep, resp := apiserver.FindFunctionEndpoint(u, c, "config", "GET")
-		if resp.Error != "" {
-			log.Debug(resp.Error)
-			log.Fatalf(resp.FriendlyError)
-		}
+		parseResponseError(resp)
 
 		u.Path = path.Join(u.Path, ep.Path)
 
@@ -106,11 +100,8 @@ var getBoot = &cobra.Command{
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
-		// If an error has been returned then handle the error gracefully and terminate
-		if response.FriendlyError != "" || response.Error != "" {
-			log.Debugln(response.Error)
-			log.Fatalln(response.FriendlyError)
-		}
+		parseResponseError(response)
+
 		var serverConfig services.BootController
 
 		err = json.Unmarshal(response.Payload, &serverConfig)
@@ -137,10 +128,7 @@ var getConfig = &cobra.Command{
 			log.Fatalf("%s", err.Error())
 		}
 		ep, resp := apiserver.FindFunctionEndpoint(u, c, "config", "GET")
-		if resp.Error != "" {
-			log.Debug(resp.Error)
-			log.Fatalf(resp.FriendlyError)
-		}
+		parseResponseError(resp)
 
 		u.Path = path.Join(u.Path, ep.Path)
 
@@ -148,11 +136,8 @@ var getConfig = &cobra.Command{
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
-		// If an error has been returned then handle the error gracefully and terminate
-		if response.FriendlyError != "" || response.Error != "" {
-			log.Debugln(response.Error)
-			log.Fatalln(response.FriendlyError)
-		}
+		parseResponseError(response)
+
 		var serverConfig services.BootController
 
 		err = json.Unmarshal(response.Payload, &serverConfig)
@@ -179,10 +164,7 @@ var getDeployments = &cobra.Command{
 			log.Fatal(err)
 		}
 		ep, resp := apiserver.FindFunctionEndpoint(u, c, "deployments", "GET")
-		if resp.Error != "" {
-			log.Debug(resp.Error)
-			log.Fatalf(resp.FriendlyError)
-		}
+		parseResponseError(resp)
 
 		u.Path = path.Join(u.Path, ep.Path)
 
@@ -190,11 +172,7 @@ var getDeployments = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		// If an error has been returned then handle the error gracefully and terminate
-		if response.FriendlyError != "" || response.Error != "" {
-			log.Debugln(response.Error)
-			log.Fatalln(response.FriendlyError)
-		}
+		parseResponseError(response)
 
 		var deployments services.DeploymentConfigurationFile
 
@@ -223,10 +201,7 @@ var getGlobal = &cobra.Command{
 		}
 
 		ep, resp := apiserver.FindFunctionEndpoint(u, c, "deployments", "GET")
-		if resp.Error != "" {
-			log.Debug(resp.Error)
-			log.Fatalf(resp.FriendlyError)
-		}
+		parseResponseError(resp)
 
 		u.Path = path.Join(u.Path, ep.Path)
 
@@ -234,11 +209,8 @@ var getGlobal = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		// If an error has been returned then handle the error gracefully and terminate
-		if response.FriendlyError != "" || response.Error != "" {
-			log.Debugln(response.Error)
-			log.Fatalln(response.FriendlyError)
-		}
+		parseResponseError(response)
+
 		var deployments services.DeploymentConfigurationFile
 		err = json.Unmarshal(response.Payload, &deployments)
 		if err != nil {
@@ -271,10 +243,7 @@ var getLogs = &cobra.Command{
 		dashAddress := strings.Replace(args[0], ".", "-", -1)
 
 		ep, resp := apiserver.FindFunctionEndpoint(u, c, "parlayLog", "GET")
-		if resp.Error != "" {
-			log.Debug(resp.Error)
-			log.Fatalf(resp.FriendlyError)
-		}
+		parseResponseError(resp)
 
 		u.Path = path.Join(u.Path, ep.Path+"/"+dashAddress)
 
@@ -283,11 +252,7 @@ var getLogs = &cobra.Command{
 			if err != nil {
 				log.Fatalf("%s", err.Error())
 			}
-			// If an error has been returned then handle the error gracefully and terminate
-			if response.FriendlyError != "" || response.Error != "" {
-				log.Debugln(response.Error)
-				log.Fatalln(response.FriendlyError)
-			}
+			parseResponseError(response)
 
 			var logs plunderlogging.JSONLog
 
@@ -329,10 +294,7 @@ var getUnLeased = &cobra.Command{
 		}
 
 		ep, resp := apiserver.FindFunctionEndpoint(u, c, "dhcp", "GET")
-		if resp.Error != "" {
-			log.Debug(resp.Error)
-			log.Fatalf(resp.FriendlyError)
-		}
+		parseResponseError(resp)
 
 		u.Path = ep.Path + "/unleased"
 
@@ -340,11 +302,8 @@ var getUnLeased = &cobra.Command{
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
-		// If an error has been returned then handle the error gracefully and terminate
-		if response.FriendlyError != "" || response.Error != "" {
-			log.Fatalf("%s", err.Error())
+		parseResponseError(response)
 
-		}
 		var unleased []services.Lease
 
 		err = json.Unmarshal(response.Payload, &unleased)
