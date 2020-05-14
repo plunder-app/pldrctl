@@ -14,7 +14,9 @@ var deployment services.DeploymentConfig
 var bootConfig services.BootConfig
 
 func init() {
-	pldrctlCreateBoot.Flags().StringVarP(&bootConfig.ConfigName, "name", "n", "default", "The name of the new boot configuration")
+	pldrctlCreateBoot.Flags().StringVarP(&bootConfig.ConfigName, "name", "n", "demo", "The name of the new boot configuration")
+	pldrctlCreateBoot.Flags().StringVarP(&bootConfig.ConfigType, "type", "t", "default", "The type of the new boot configuration")
+
 	pldrctlCreateBoot.Flags().StringVarP(&bootConfig.Kernel, "kernel", "k", "", "The path of the kernel to be booted")
 	pldrctlCreateBoot.Flags().StringVarP(&bootConfig.Initrd, "initrd", "i", "", "The path of init ramdisk to be booted")
 	pldrctlCreateBoot.Flags().StringVarP(&bootConfig.Cmdline, "cmdline", "c", "", "Additional kernel commandline flags (optional)")
@@ -60,7 +62,7 @@ var pldrctlCreateBoot = &cobra.Command{
 		ep, resp := apiserver.FindFunctionEndpoint(u, c, "configBoot", "POST")
 		if resp.Error != "" {
 			log.Debug(resp.Error)
-			log.Fatalf(resp.FriendlyError)
+			log.Fatalf(resp.Warning)
 		}
 		u.Path = ep.Path + "/" + bootConfig.ConfigName
 
@@ -68,10 +70,7 @@ var pldrctlCreateBoot = &cobra.Command{
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
-		if response.FriendlyError != "" || response.Error != "" {
-			log.Debugln(response.Error)
-			log.Fatalln(response.FriendlyError)
-		}
+		parseResponseError(response)
 
 	},
 }
@@ -102,10 +101,7 @@ var pldrctlCreateDeployment = &cobra.Command{
 			log.Fatalf("%s", err.Error())
 		}
 		ep, resp := apiserver.FindFunctionEndpoint(u, c, "deployment", "POST")
-		if resp.Error != "" {
-			log.Debug(resp.Error)
-			log.Fatalf(resp.FriendlyError)
-		}
+		parseResponseError(resp)
 		u.Path = ep.Path
 
 		response, err := apiserver.ParsePlunderPost(u, c, b)
@@ -113,10 +109,7 @@ var pldrctlCreateDeployment = &cobra.Command{
 			log.Fatalf("%s", err.Error())
 		}
 
-		if response.FriendlyError != "" || response.Error != "" {
-			log.Debugln(response.Error)
-			log.Fatalln(response.FriendlyError)
-		}
+		parseResponseError(response)
 
 	},
 }

@@ -11,10 +11,11 @@ import (
 //BootFormat will display the global deployment configuration for a Plunder Server
 func BootFormat(bootConfigs []services.BootConfig) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "Config Name\tKernel Path\tInitrd Path\tCommand Line")
+	fmt.Fprintln(w, "Config Name\tConfig Type\tKernel Path\tInitrd Path\tCommand Line")
 	for i := range bootConfigs {
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
 			bootConfigs[i].ConfigName,
+			bootConfigs[i].ConfigType,
 			bootConfigs[i].Kernel,
 			bootConfigs[i].Initrd,
 			bootConfigs[i].Cmdline)

@@ -58,10 +58,8 @@ var pldrctlExec = &cobra.Command{
 		}
 
 		ep, resp := apiserver.FindFunctionEndpoint(u, c, "parlay", "POST")
-		if resp.Error != "" {
-			log.Debug(resp.Error)
-			log.Fatalf(resp.FriendlyError)
-		}
+		parseResponseError(resp)
+
 		u.Path = path.Join(u.Path, ep.Path)
 		b, err := json.Marshal(newMap)
 		if err != nil {
@@ -71,11 +69,7 @@ var pldrctlExec = &cobra.Command{
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
-		// If an error has been returned then handle the error gracefully and terminate
-		if response.FriendlyError != "" || response.Error != "" {
-			log.Debugln(response.Error)
-			log.Fatalln(response.FriendlyError)
-		}
+		parseResponseError(response)
 
 	},
 }

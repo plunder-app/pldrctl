@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/plunder-app/plunder/pkg/apiserver"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/ghodss/yaml"
 )
 
@@ -45,4 +48,14 @@ func UnPackResourceContainer(b []byte) (container *ResourceContainer, err error)
 		}
 	}
 	return container, nil
+}
+
+func parseResponseError(r *apiserver.Response) {
+	// If an error has been returned then handle the error gracefully and terminate
+	if r.Warning != "" {
+		log.Warnf(r.Warning)
+		if r.Error != "" {
+			log.Fatalf(r.Error)
+		}
+	}
 }

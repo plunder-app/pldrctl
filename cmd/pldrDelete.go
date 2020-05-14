@@ -63,19 +63,13 @@ var pldrctlDeleteDeployment = &cobra.Command{
 		}
 
 		ep, resp := apiserver.FindFunctionEndpoint(u, c, "deploymentID", http.MethodDelete)
-		if resp.Error != "" {
-			log.Debug(resp.Error)
-			log.Fatalf(resp.FriendlyError)
-		}
+		parseResponseError(resp)
 
 		u.Path = path.Join(u.Path, ep.Path+"/"+strings.Replace(args[0], ":", "-", -1))
 
 		response, err := apiserver.ParsePlunderDelete(u, c)
+		parseResponseError(response)
 
-		if response.FriendlyError != "" || response.Error != "" {
-			log.Debugln(response.Error)
-			log.Fatalln(response.FriendlyError)
-		}
 	},
 }
 
@@ -95,19 +89,13 @@ var pldrctlDeleteLogs = &cobra.Command{
 		}
 
 		ep, resp := apiserver.FindFunctionEndpoint(u, c, "parlayLog", http.MethodDelete)
-		if resp.Error != "" {
-			log.Debug(resp.Error)
-			log.Fatalf(resp.FriendlyError)
-		}
+		parseResponseError(resp)
 
 		u.Path = path.Join(u.Path, ep.Path+"/"+strings.Replace(args[0], ":", "-", -1))
 
 		response, err := apiserver.ParsePlunderDelete(u, c)
+		parseResponseError(response)
 
-		if response.FriendlyError != "" || response.Error != "" {
-			log.Debugln(response.Error)
-			log.Fatalln(response.FriendlyError)
-		}
 	},
 }
 
@@ -126,17 +114,12 @@ var pldrctlDeleteBoot = &cobra.Command{
 		}
 
 		ep, resp := apiserver.FindFunctionEndpoint(u, c, "configBoot", http.MethodDelete)
-		if resp.Error != "" {
-			log.Debug(resp.Error)
-			log.Fatalf(resp.FriendlyError)
-		}
+		parseResponseError(resp)
 
 		u.Path = path.Join(ep.Path + "/" + args[0])
 
 		response, err := apiserver.ParsePlunderDelete(u, c)
-		if response.FriendlyError != "" || response.Error != "" {
-			log.Debugln(response.Error)
-			log.Fatalln(response.FriendlyError)
-		}
+		parseResponseError(response)
+
 	},
 }

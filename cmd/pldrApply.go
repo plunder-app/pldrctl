@@ -89,8 +89,9 @@ func parseApply(resourceDefinition string, resource json.RawMessage) error {
 
 		ep, resp := apiserver.FindFunctionEndpoint(u, c, "deployment", "POST")
 		if resp.Error != "" {
-			log.Debug(resp.Error)
-			log.Fatalf(resp.FriendlyError)
+			log.Warnf(resp.Warning)
+			log.Fatalf(resp.Error)
+
 		}
 
 		u.Path = path.Join(u.Path, ep.Path)
@@ -99,19 +100,15 @@ func parseApply(resourceDefinition string, resource json.RawMessage) error {
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
-		// If an error has been returned then handle the error gracefully and terminate
-		if response.FriendlyError != "" || response.Error != "" {
-			log.Debugln(response.Error)
-			log.Fatalln(response.FriendlyError)
-		}
+		parseResponseError(response)
 
 	case "deployments":
 		// Set the url
 
 		ep, resp := apiserver.FindFunctionEndpoint(u, c, "deployments", "POST")
 		if resp.Error != "" {
-			log.Debug(resp.Error)
-			log.Fatalf(resp.FriendlyError)
+			log.Warnf(resp.Warning)
+			log.Fatalf(resp.Error)
 		}
 
 		u.Path = path.Join(u.Path, ep.Path)
@@ -121,17 +118,14 @@ func parseApply(resourceDefinition string, resource json.RawMessage) error {
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
-		// If an error has been returned then handle the error gracefully and terminate
-		if response.FriendlyError != "" || response.Error != "" {
-			log.Debugln(response.Error)
-			log.Fatalln(response.FriendlyError)
-		}
+		parseResponseError(response)
+
 	case "globalconfig":
 		// Set the url
 		ep, resp := apiserver.FindFunctionEndpoint(u, c, "deployments", "POST")
 		if resp.Error != "" {
-			log.Debug(resp.Error)
-			log.Fatalf(resp.FriendlyError)
+			log.Warnf(resp.Warning)
+			log.Fatalf(resp.Error)
 		}
 
 		u.Path = path.Join(u.Path, ep.Path+"/global")
@@ -141,16 +135,13 @@ func parseApply(resourceDefinition string, resource json.RawMessage) error {
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
-		// If an error has been returned then handle the error gracefully and terminate
-		if response.FriendlyError != "" || response.Error != "" {
-			log.Debugln(response.Error)
-			log.Fatalln(response.FriendlyError)
-		}
+		parseResponseError(response)
+
 	case "parlay":
 		ep, resp := apiserver.FindFunctionEndpoint(u, c, "parlay", "POST")
 		if resp.Error != "" {
-			log.Debug(resp.Error)
-			log.Fatalf(resp.FriendlyError)
+			log.Warnf(resp.Warning)
+			log.Fatalf(resp.Error)
 		}
 
 		u.Path = path.Join(u.Path, ep.Path)
@@ -160,15 +151,10 @@ func parseApply(resourceDefinition string, resource json.RawMessage) error {
 		if err != nil {
 			log.Fatalf("%s", err.Error())
 		}
+		parseResponseError(response)
 
-		// If an error has been returned then handle the error gracefully and terminate
-		if response.FriendlyError != "" || response.Error != "" {
-			log.Debugln(response.Error)
-			log.Fatalln(response.FriendlyError)
-		}
 	default:
 		return fmt.Errorf("Unknown resource Definition [%s]", resourceDefinition)
-
 	}
 	return nil
 }
