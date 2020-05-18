@@ -88,11 +88,7 @@ func parseApply(resourceDefinition string, resource json.RawMessage) error {
 	case "deployment":
 
 		ep, resp := apiserver.FindFunctionEndpoint(u, c, "deployment", "POST")
-		if resp.Error != "" {
-			log.Warnf(resp.Warning)
-			log.Fatalf(resp.Error)
-
-		}
+		parseResponseError(resp)
 
 		u.Path = path.Join(u.Path, ep.Path)
 
@@ -106,10 +102,7 @@ func parseApply(resourceDefinition string, resource json.RawMessage) error {
 		// Set the url
 
 		ep, resp := apiserver.FindFunctionEndpoint(u, c, "deployments", "POST")
-		if resp.Error != "" {
-			log.Warnf(resp.Warning)
-			log.Fatalf(resp.Error)
-		}
+		parseResponseError(resp)
 
 		u.Path = path.Join(u.Path, ep.Path)
 
@@ -123,10 +116,7 @@ func parseApply(resourceDefinition string, resource json.RawMessage) error {
 	case "globalconfig":
 		// Set the url
 		ep, resp := apiserver.FindFunctionEndpoint(u, c, "deployments", "POST")
-		if resp.Error != "" {
-			log.Warnf(resp.Warning)
-			log.Fatalf(resp.Error)
-		}
+		parseResponseError(resp)
 
 		u.Path = path.Join(u.Path, ep.Path+"/global")
 
@@ -139,10 +129,7 @@ func parseApply(resourceDefinition string, resource json.RawMessage) error {
 
 	case "parlay":
 		ep, resp := apiserver.FindFunctionEndpoint(u, c, "parlay", "POST")
-		if resp.Error != "" {
-			log.Warnf(resp.Warning)
-			log.Fatalf(resp.Error)
-		}
+		parseResponseError(resp)
 
 		u.Path = path.Join(u.Path, ep.Path)
 

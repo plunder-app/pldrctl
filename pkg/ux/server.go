@@ -31,11 +31,11 @@ func ServerFormat(b services.BootController) {
 	fmt.Fprintf(w, "%s:\t%s\n", "Adapter", *b.AdapterName)
 	fmt.Fprintf(w, "%s:\t%t\n", "Enable DHCP", *b.EnableDHCP)
 	// DNS Configuration
-	fmt.Fprintf(w, "\t%s:\t%s\n", "DHCP Server Address", *b.DHCPConfig.DHCPAddress)
-	fmt.Fprintf(w, "\t%s:\t%s\n", "DHCP Gateway Address", *b.DHCPConfig.DHCPGateway)
-	fmt.Fprintf(w, "\t%s:\t%s\n", "DHCP DNS Address", *b.DHCPConfig.DHCPDNS)
-	fmt.Fprintf(w, "\t%s:\t%s\n", "DHCP Start Address", *b.DHCPConfig.DHCPStartAddress)
-	fmt.Fprintf(w, "\t%s:\t%d\n", "DHCP Lease Pool Size", *b.DHCPConfig.DHCPLeasePool)
+	fmt.Fprintf(w, "\t%s:\t%s\n", "DHCP Server Address", b.DHCPConfig.DHCPAddress)
+	fmt.Fprintf(w, "\t%s:\t%s\n", "DHCP Gateway Address", b.DHCPConfig.DHCPGateway)
+	fmt.Fprintf(w, "\t%s:\t%s\n", "DHCP DNS Address", b.DHCPConfig.DHCPDNS)
+	fmt.Fprintf(w, "\t%s:\t%s\n", "DHCP Start Address", b.DHCPConfig.DHCPStartAddress)
+	fmt.Fprintf(w, "\t%s:\t%d\n", "DHCP Lease Pool Size", b.DHCPConfig.DHCPLeasePool)
 	fmt.Fprintf(w, "%s:\t%t\n", "Enable TFTP", *b.EnableTFTP)
 	// TFTP Configuration
 	fmt.Fprintf(w, "\t%s:\t%s\n", "TFTP Server Address", *b.TFTPAddress)

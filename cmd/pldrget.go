@@ -28,6 +28,7 @@ func init() {
 
 	pldrctlGet.AddCommand(getAPI)
 	pldrctlGet.AddCommand(getBoot)
+	pldrctlGet.AddCommand(getDeployment)
 	pldrctlGet.AddCommand(getDeployments)
 	pldrctlGet.AddCommand(getGlobal)
 	pldrctlGet.AddCommand(getConfig)
@@ -185,6 +186,50 @@ var getDeployments = &cobra.Command{
 			err = ux.CheckOutFlag(outputFlag, NewResourceContainer("deployments", response.Payload))
 		} else {
 			ux.DeploymentsGetFormat(deployments)
+		}
+	},
+}
+
+var getDeployment = &cobra.Command{
+	Use:   "deployment",
+	Short: "Retrieve a specific deployment from a Plunder server",
+	Run: func(cmd *cobra.Command, args []string) {
+		// Parse through the flags and attempt to build a correct URL
+		log.SetLevel(log.Level(logLevel))
+
+		u, c, err := apiserver.BuildEnvironmentFromConfig(pathFlag, urlFlag)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if len(args) != 1 {
+			log.Fatalf("An MAC address of a remote server to retrieve the logs for is required")
+		}
+
+		dashAddress := strings.Replace(args[0], ".", "-", -1)
+
+		ep, resp := apiserver.FindFunctionEndpoint(u, c, "deploymentID", "GET")
+		parseResponseError(resp)
+
+		u.Path = path.Join(u.Path, ep.Path+"/"+dashAddress)
+
+		response, err := apiserver.ParsePlunderGet(u, c)
+		if err != nil {
+			log.Fatal(err)
+		}
+		parseResponseError(response)
+
+		var deployment services.DeploymentConfig
+
+		err = json.Unmarshal(response.Payload, &deployment)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if outputFlag != "" {
+			err = ux.CheckOutFlag(outputFlag, NewResourceContainer("deployment", response.Payload))
+		} else {
+			//ux.DeploymentsGetFormat(deployments)
 		}
 	},
 }
