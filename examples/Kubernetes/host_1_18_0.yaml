@@ -1,0 +1,53 @@
+definition: parlay
+resource:
+  deployments:
+  - actions:
+    - command: tee /etc/apt/sources.list
+      commandPipeCmd: echo -e "deb http://uk.archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse"
+      commandSudo: root
+      name: Cluster-API provisioning [reset Ubuntu repositories] 
+      type: command
+      ignoreFail: true
+    - command: sudo apt-get update
+      commandSudo: root
+      name: Cluster-API provisioning [Ubuntu package update]
+      type: command
+    - command: apt-get install curl apt-transport-https gnupg-agent ca-certificates software-properties-common ethtool socat ebtables conntrack libnetfilter-conntrack3 -y
+      commandSudo: root
+      name: Cluster-API provisioning [Ubuntu package installation] 
+      type: command
+    - command: tee /etc/apt/sources.list.d/docker.list
+      commandPipeCmd: echo "deb https://download.docker.com/linux/ubuntu xenial stable"
+      commandSudo: root
+      name: Cluster-API provisioning [set Docker Repository]
+      type: command
+      ignoreFail: true
+    - command: tee /etc/apt/sources.list.d/kubernetes.list
+      commandPipeCmd: echo "deb https://apt.kubernetes.io/ kubernetes-xenial main"
+      commandSudo: root
+      name: Cluster-API provisioning [set Kubernetes Repository]
+      type: command
+    - command: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+      commandSudo: root
+      name: Cluster-API provisioning [add Docker GPG Key]
+      type: command
+    - command: curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+      commandSudo: root
+      name: Cluster-API provisioning [add Kubernetes GPG Key]
+      type: command
+    - command: sudo apt-get update
+      commandSudo: root
+      name: Cluster-API provisioning [Ubuntu package update]
+      type: command
+    - command: apt-get install -y docker-ce=18.06.1~ce~3-0~ubuntu kubelet=1.18.0-00 kubeadm=1.18.0-00 kubectl=1.18.0-00 kubernetes-cni cri-tools
+      commandSudo: root
+      name: Cluster-API provisioning [Docker / Kubernetes package installation] 
+      type: command
+    - command: kubeadm config images pull --kubernetes-version "v1.18.0"
+      commandSudo: root
+      name: Cluster-API provisioning [Docker / Kubernetes package installation] 
+      type: command
+    hosts:
+    - 172.16.1.121
+    name: Install Kubernetes components for Ubuntu image
+    parallel: false

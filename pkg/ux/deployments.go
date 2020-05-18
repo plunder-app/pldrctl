@@ -11,7 +11,7 @@ import (
 // DeploymentsGetFormat -
 func DeploymentsGetFormat(plunderConfig services.DeploymentConfigurationFile) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "Mac Address\tDeploymemt Name\tHostname\tIP Address")
+	fmt.Fprintln(w, "Mac Address\tBoot Config Name\tHostname\tIP Address")
 	for i := range plunderConfig.Configs {
 		d := plunderConfig.Configs[i]
 
@@ -26,8 +26,8 @@ func DeploymentDescribeBootFormat(h services.DeploymentConfig, plunderURL, dashm
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 	// Config overview
 	fmt.Fprintf(w, "%s:\t\n", "Config")
-	fmt.Fprintf(w, "\t%s:\t%s\n", "Deployment Name", h.ConfigBoot.ConfigName)
-	fmt.Fprintf(w, "\t%s:\t%s\n", "Deployment Type", h.ConfigBoot.ConfigType)
+	fmt.Fprintf(w, "\t%s:\t%s\n", "Boot Name", h.ConfigBoot.ConfigName)
+	fmt.Fprintf(w, "\t%s:\t%s\n", "Boot Type", h.ConfigBoot.ConfigType)
 	fmt.Fprintf(w, "\t%s:\t%s\n", "Kernel", h.ConfigBoot.Kernel)
 	fmt.Fprintf(w, "\t%s:\t%s\n", "Initrd", h.ConfigBoot.Initrd)
 	fmt.Fprintf(w, "\t%s:\t%s\n", "cmdline", h.ConfigBoot.Cmdline)

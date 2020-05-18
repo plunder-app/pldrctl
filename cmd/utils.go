@@ -54,8 +54,10 @@ func parseResponseError(r *apiserver.Response) {
 	// If an error has been returned then handle the error gracefully and terminate
 	if r.Warning != "" {
 		log.Warnf(r.Warning)
-		if r.Error != "" {
-			log.Fatalf(r.Error)
-		}
 	}
+
+	if r.Error != "" {
+		log.Fatalf(r.Error)
+	}
+
 }
