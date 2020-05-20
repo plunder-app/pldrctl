@@ -34,6 +34,7 @@ func init() {
 	pldrctlCmd.AddCommand(pldrctlDescribe)
 	pldrctlCmd.AddCommand(pldrctlExec)
 	pldrctlCmd.AddCommand(pldrctlGet)
+	pldrctlCmd.AddCommand(pldrctlPatch)
 	pldrctlCmd.AddCommand(pldrctlVersion)
 	pldrctlCmd.AddCommand(pldrctlWatch)
 

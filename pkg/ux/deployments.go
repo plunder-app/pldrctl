@@ -11,11 +11,11 @@ import (
 // DeploymentsGetFormat -
 func DeploymentsGetFormat(plunderConfig services.DeploymentConfigurationFile) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "Mac Address\tBoot Config Name\tHostname\tIP Address")
+	fmt.Fprintln(w, "Mac Address\tHostname\tIP Address\tBoot Config Name")
 	for i := range plunderConfig.Configs {
 		d := plunderConfig.Configs[i]
 
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", d.MAC, d.ConfigName, d.ConfigHost.ServerName, d.ConfigHost.IPAddress)
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", d.MAC, d.ConfigHost.ServerName, d.ConfigHost.IPAddress, d.ConfigName)
 	}
 	w.Flush()
 }
