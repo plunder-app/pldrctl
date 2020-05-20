@@ -43,11 +43,15 @@ resource:
       commandSudo: root
       name: Cluster-API provisioning [Docker / Kubernetes package installation] 
       type: command
+    - command: apt-get clean
+      commandSudo: root
+      name: Cluster-API provisioning [Clean caches] 
+      type: command
     - command: kubeadm config images pull --kubernetes-version "v1.18.0"
       commandSudo: root
-      name: Cluster-API provisioning [Docker / Kubernetes package installation] 
+      name: Cluster-API provisioning [pre-pull images] 
       type: command
     hosts:
-    - 172.16.1.121
+    - x.x.x.x 
     name: Install Kubernetes components for Ubuntu image
     parallel: false
